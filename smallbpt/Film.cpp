@@ -1,7 +1,7 @@
 #include "Film.h"
 #include "Smallbpt.h"
 #include <string>
-//#include "svpng.inc"
+#include "svpng.inc"
 #include <iostream>
 void Film::AddSplat(Vec3 pRaster, Vec3 Value) {
 	int pixelX = (int)(pRaster.x);
@@ -85,7 +85,7 @@ void Film::WriteToImage() {
 	}
 
 	FILE *fp = fopen(filename.c_str(), "wb");
-	//svpng(fp, width, heigh, RGBs, 0);
+	svpng(fp, width, heigh, RGBs, 0);
 
 	fclose(fp);
 }

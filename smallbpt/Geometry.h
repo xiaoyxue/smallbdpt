@@ -4,6 +4,7 @@
 #include "Smallbpt.h"
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 struct Vec3 {        // Usage: time ./explicit 16 && xv image.ppm
 	double x, y, z;

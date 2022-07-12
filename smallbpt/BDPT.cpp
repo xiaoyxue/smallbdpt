@@ -47,8 +47,7 @@ int GenerateCameraPath(Sampler &sampler, std::vector<PathVertex> &CameraPath,
 }
 
 
-int Trace(const Ray &ray, Vec3 Throughput, double PdfFwd, Sampler &sampler,
-	std::vector<PathVertex> &Path, int depth, int maxDepth) {
+int Trace(const Ray &ray, Vec3 Throughput, double PdfFwd, Sampler &sampler, std::vector<PathVertex> &Path, int depth, int maxDepth) {
 	Ray r = ray;
 	int bound = depth;
 	double PdfW = PdfFwd;
@@ -536,7 +535,7 @@ Vec3 ConnectBDPT(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &Ca
 	else {
 
 		const PathVertex &LightVertex = LightPath[s - 1], &CameraVertex = CameraPath[t - 1];
-		//Becareful, if hitpoints on one object, we need to use normal to correct the point position
+		//Be careful, if hit points on one object, we need to use normal to correct the point position
 		if (!LightVertex.isect.Delta && !CameraVertex.isect.Delta 
 			&& IsConnectible(LightVertex.isect.HitPoint + eps * LightVertex.isect.Normal
 				, CameraVertex.isect.HitPoint + eps * CameraVertex.isect.Normal)) {
@@ -573,6 +572,10 @@ Vec3 ConnectBDPT(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &Ca
 		
 	}
 	double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(LightPath, CameraPath, s, t, sampled));
+	double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t));
+	double MIS3 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight3(LightPath, CameraPath, s, t, sampled));
+	double MIS4 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight4(LightPath, CameraPath, s, t));
+	//std::cout << MIS << " " << MIS2 << " " << MIS3 << " " << MIS4 << std::endl;
 	L = MIS * L;
 	if (MISRecord) *MISRecord = MIS;
 	return L;

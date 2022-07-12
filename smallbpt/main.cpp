@@ -15,7 +15,7 @@ int main() {
 #ifdef _DEBUG
 	//width = 40, heigh = 10;
 #endif
-	std::string filename = "Image21.png";
+	std::string filename = "Result/Image.png";
 	Film film(width, heigh, filename);
 	Camera camera;
 	Vec3 camPos(50, 52, 295.6), d(0, -0.042612, -1);
@@ -30,10 +30,10 @@ int main() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render();
 
-	//BidirectionalPathTracing bpt(&sampler, &camera, &film, 16, 32, false, false);
-	//bpt.Render();
+	BidirectionalPathTracing bpt(&sampler, &camera, &film, 16, 32, false, false);
+	bpt.Render();
 
-	PathTracing pt(&sampler, &camera, 12, 128);
+	//PathTracing pt(&sampler, &camera, 12, 128);
 	//pt.Render();
 
 	
