@@ -246,100 +246,6 @@ double MISWeight(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &Ca
 	return 1 / (1 + sumRi);
 }
 
-
-double MISWeight2(const std::vector<PathVertex> &LightPath, const std::vector<PathVertex> &CameraPath,
-	int s, int t) {
-	if (t == 1 && s == 0) std::cout << "t = 1, s = 0" << std::endl;
-	if (s + t == 2) return 1.0;
-	double ps = 1.0;
-	for (int i = 0; i < s; ++i) ps *= LightPath[i].PdfFwd;
-	for (int i = t - 1; i >= 0; --i) ps *= CameraPath[i].PdfFwd;
-
-	double p = 0.0;
-	for (int i = 0; i < s + t; ++i) {
-		double pi = 1.0;
-		for (int j = 0; j < s; ++j) {
-			if (j < i) pi *= LightPath[j].PdfFwd;
-			else pi *= LightPath[j].PdfPrev;
-		}
-		for (int j = 0; j < t; ++j) {
-			int k = s + t - i;
-			if (j < k) pi *= CameraPath[j].PdfFwd;
-			else pi *= CameraPath[j].PdfPrev;
-		}
-		p += pi / ps;
-	}
-	return 1 / p;
-}
-
-
-double PathPdf(const std::vector<PathVertex> &LightPath, const std::vector<PathVertex> &CameraPath,
-	int s, int t, bool specialPath) {
-	std::vector<PathVertex> FullPath;
-	for (int i = 0; i < s; ++i) FullPath.push_back(LightPath[i]);
-	for (int i = t - 1; i >= 0; i--) {
-		FullPath.push_back(CameraPath[i]);
-	}
-
-	auto remap0 = [](double f)->double {return f != 0 ? f : 1; };
-
-	double p = 0.0;
-	if (specialPath) {
-		double PdfPath = 1.0;
-		for (int i = 0; i < s; ++i) PdfPath *= FullPath[i].PdfFwd;
-		for (int i = 0; i < t; ++i) {
-			int j = s + t - 1 - i;
-			PdfPath *= FullPath[j].PdfFwd;
-		}
-		p += PdfPath;
-	}
-	else {
-		for (int nLightVertex = 0; nLightVertex <= s + t - 1; ++nLightVertex) {
-			double PdfPath = 1.0;
-			for (int i = 0; i < nLightVertex; ++i) {
-				if (i == 0) PdfPath *= FullPath[i].PdfFwd;
-				else if (i == 1) PdfPath *= FullPath[i].PdfFwd;
-				else {
-					const PathVertex &LightVertexi = FullPath[i];
-					const PathVertex &LightVertexi_1 = FullPath[i - 1];
-					const PathVertex &LightVertexi_2 = FullPath[i - 2];
-					Vec3 wo = LightVertexi_2.isect.HitPoint - LightVertexi_1.isect.HitPoint;
-					Vec3 wi = LightVertexi.isect.HitPoint - LightVertexi_1.isect.HitPoint;
-					double dist = wi.length();
-					wo.norm(); wi.norm();
-					double PdfW = LightVertexi_1.isect.bsdf->Pdf(wo, wi);
-					double CosTheta_i = std::abs(LightVertexi.isect.Normal.dot(wi));
-					double PdfA = PdfW * CosTheta_i / dist / dist;
-					PdfPath *= PdfA;
-				}
-			}
-			int nCameraVertex = s + t - nLightVertex;
-			for (int i = 0; i < nCameraVertex; ++i) {
-				int j = s + t - 1 - i;
-				if (i == 0) PdfPath *= FullPath[j].PdfFwd;
-				else if (i == 1) PdfPath *= FullPath[j].PdfFwd;
-				else {
-					const PathVertex &CameraVertexi = FullPath[j];
-					const PathVertex &CameraVertexi_1 = FullPath[j + 1];
-					const PathVertex &CameraVertexi_2 = FullPath[j + 2];
-					Vec3 wo = CameraVertexi_2.isect.HitPoint - CameraVertexi_1.isect.HitPoint;
-					Vec3 wi = CameraVertexi.isect.HitPoint - CameraVertexi_1.isect.HitPoint;
-					double dist = wi.length();
-					wo.norm(); wi.norm();
-					double PdfW = CameraVertexi_1.isect.bsdf->Pdf(wo, wi);
-					double CosTheta_i = std::abs(CameraVertexi.isect.Normal.dot(wi));
-					double PdfA = PdfW * CosTheta_i / dist / dist;
-					PdfPath *= PdfA;
-				}
-			}
-			
-			p += PdfPath;
-		}
-	}
-	return p;
-}
-
-
 double Path_Pdf(const std::vector<PathVertex> &Path, int s, int t) {	
 	double p = 1.0;
 	for (int i = 0; i < s; ++i) {
@@ -396,7 +302,7 @@ double Path_Pdf(const std::vector<PathVertex> &Path, int s, int t) {
 	return p;
 }
 
-double MISWeight3(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &CameraPath,
+double MISWeight2(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &CameraPath,
 	int s, int t, PathVertex &sampled) {
 	if (s + t == 2) return 1.0;
 
@@ -427,20 +333,6 @@ double MISWeight3(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &C
 	else return std::max(std::min(Pdf_s / Pdf_all, 1.0), 0.0);
 }
 
-double MISWeight4(const std::vector<PathVertex> &LightPath, const std::vector<PathVertex> &CameraPath,
-	int s, int t) {
-	double p_i = 1.0, p_all = 0.0;
-	for (int i = 0; i < s - 1; ++i) p_i *= LightPath[i].PdfFwd;
-	for (int i = 0; i < t - 1; ++i) p_i *= LightPath[i].PdfFwd;
-	for (int nLightVertex = 0; nLightVertex <= s + t - 1; ++nLightVertex) {
-		double PdfPath = 1.0;
-		for (int i = 0; i < nLightVertex; ++i) PdfPath *= LightPath[i].PdfFwd;
-		int nCameraVertex = s + t - nLightVertex;
-		for (int i = 0; i < nCameraVertex; ++i) PdfPath *= CameraPath[i].PdfFwd;
-		p_all += PdfPath;
-	}
-	return p_i / p_all;
-}
 
 Vec3 ConnectBDPT(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &CameraPath,
 	int s, int t, Camera &camera, Sampler &sampler, Vec3 *pRaster, bool *inScreen, double *MISRecord) {
@@ -572,9 +464,7 @@ Vec3 ConnectBDPT(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &Ca
 		
 	}
 	double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(LightPath, CameraPath, s, t, sampled));
-	double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t));
-	double MIS3 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight3(LightPath, CameraPath, s, t, sampled));
-	double MIS4 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight4(LightPath, CameraPath, s, t));
+	double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t, sampled));
 	//std::cout << MIS << " " << MIS2 << " " << MIS3 << " " << MIS4 << std::endl;
 	L = MIS * L;
 	if (MISRecord) *MISRecord = MIS;
