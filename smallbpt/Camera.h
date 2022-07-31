@@ -2,7 +2,7 @@
 #define CAMERA_H
 #include "Geometry.h"
 #include "Film.h"
-#include "Intersect.h"
+#include "Intersection.h"
 
 struct CameraSample {
 	Vec3 filmPoint;
@@ -25,7 +25,7 @@ public:
 		return Vec3(Value, Value, Value);
 	}
 
-	Vec3 Sample_Wi(const Intersect &isect, double *PdfW, Vec3 *wi) const {
+	Vec3 Sample_Wi(const Intersection &isect, double *PdfW, Vec3 *wi) const {
 		*wi = (o - isect.HitPoint);
 		double distance = wi->length();
 		wi->norm();
@@ -70,10 +70,14 @@ public:
 		double alpha = pW / (film->RU - film->LU).length();
 		double beta = pH / (film->LL - film->LU).length();
 		
-		int px = (int)(film->width * alpha);
-		int py = (int)(film->heigh * beta);
+		int px = (int)(film->resX * alpha);
+		int py = (int)(film->resY * beta);
 
 		return Vec3(px, py);
+	}
+
+	Film* GetFilm() const  {
+		return film;
 	}
 
 public:

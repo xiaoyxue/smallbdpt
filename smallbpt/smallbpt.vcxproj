@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <OpenMPSupport>false</OpenMPSupport>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +145,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -172,15 +174,18 @@
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Integrator.h" />
-    <ClInclude Include="Intersect.h" />
+    <ClInclude Include="Intersection.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="LightTracing.h" />
     <ClInclude Include="PathTracing.h" />
     <ClInclude Include="PathVertex.h" />
     <ClInclude Include="pbrtrng.h" />
+    <ClInclude Include="Platform.h" />
     <ClInclude Include="Rng.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="Sampling.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ScopedAssignment.h" />
     <ClInclude Include="Smallbpt.h" />
     <ClInclude Include="Threading.h" />
   </ItemGroup>

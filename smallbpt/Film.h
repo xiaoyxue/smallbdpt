@@ -5,15 +5,17 @@
 #include "Threading.h"
 class Film {
 public:
-	Film(int w = 1024, int h = 768, std::string  _filename = "Image.png") : width(w), heigh(h), filename(_filename){
-		Image = new Vec3[width * heigh]();
-		Splat = new Vec3[width * heigh]();
-		RGBs = new unsigned char[width * heigh * 3]();
-		aspect = (double)(width) / (double)(heigh);
+	Film(int resolutionX = 1024, int resolutionY = 768, std::string  _filename = "Image.png") :
+		resX(resolutionX), resY(resolutionY), filename(_filename)
+	{
+		Image = new Vec3[resX * resY]();
+		Splat = new Vec3[resX * resY]();
+		RGBs = new unsigned char[resX * resY * 3]();
+		aspect = (double)(resX) / (double)(resY);
 
-		Spinlocks.resize(width * heigh);
+		Spinlocks.resize(resX * resY);
 
-		VisualPlane = new Vec3[width * heigh]();
+		VisualPlane = new Vec3[resX * resY]();
 
 	}
 	~Film() {
@@ -32,7 +34,7 @@ public:
 	Vec3 LL, LU, RL, RU;
 	double aspect;
 	double Area;
-	int width, heigh;
+	int resX, resY;
 
 private:
 	Vec3 *Image, *Splat;

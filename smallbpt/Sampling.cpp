@@ -64,3 +64,9 @@ Vec3 UniformSampleCone(const Vec3 &u, double cosThetaMax, const Vec3 &x,
 double UniformConePdf(double cosThetaMax) {
 	return 1 / (2 * PI * (1 - cosThetaMax));
 }
+
+Vec3 UniformSampleTriangle(const Vec3& u)
+{
+	double su0 = std::sqrt(u[0]);
+	return Vec3(1 - su0, u[1] * su0, 0);
+}
