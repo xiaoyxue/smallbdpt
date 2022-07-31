@@ -292,7 +292,6 @@ double Path_Pdf(const std::vector<PathVertex> &Path, int s, int t) {
 			}
 		}
 	}
-	
 	return p;
 }
 
@@ -323,6 +322,7 @@ double MISWeight2(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &C
 		Pdf_all += Path_Pdf(FullPath, nLightVertices, nCameraVertices);
 
 	}
+	//std::cout << Pdf_s << std::endl;
 	if ((Pdf_s == 0.0) || (Pdf_all == 0.0)) return 0.0;
 	else return std::max(std::min(Pdf_s / Pdf_all, 1.0), 0.0);
 }
@@ -458,8 +458,8 @@ Vec3 ConnectBDPT(const Scene &scene, const Camera& camera, Sampler& sampler, std
 		
 	}
 	double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(LightPath, CameraPath, s, t, sampled));
-	//double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t, sampled));
-	//std::cout << MIS << " " << MIS2 << std::endl;
+	double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t, sampled));
+	//std::cout << "MIS: " << MIS << " MIS2: " << MIS2 << std::endl;
 	L = MIS * L;
 	if (MISRecord) *MISRecord = MIS;
 	return L;
