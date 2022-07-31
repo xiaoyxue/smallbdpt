@@ -23,7 +23,6 @@ private:
 
 	int mSpp, mMaxDepth;
 	Sampler *mpSampler;
-	//std::vector<PathVertex> LightPath;
 };
 
 int GenerateLightPath(const Scene& scene, Sampler &sampler, std::vector<PathVertex> &LightPath, int maxdepth);

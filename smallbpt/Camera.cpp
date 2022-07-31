@@ -3,8 +3,8 @@
 #include "Smallbpt.h"
 #include <iostream>
 
-void Camera::SetCamera(const Vec3 &_o, const Vec3 &_d,
-	const Vec3 &_u, const Vec3 &_v, double _dis, double fov) {
+void Camera::SetCamera(const Vec3& _o, const Vec3& _d,
+	const Vec3& _u, const Vec3& _v, double _dis, double fov) {
 	o = _o;
 	d = _d;
 	u = _u;
@@ -36,7 +36,7 @@ void Camera::Init() {
 	film->Area = (film->LL - film->LU).length() * (film->RU - film->LU).length();
 }
 
-int Camera::GenerateCameraRay(const CameraSample &sample, Ray &ray) {
+int Camera::GenerateCameraRay(const CameraSample& sample, Ray& ray) {
 	Vec3 dir = (sample.filmPoint - o).norm();
 	ray.o = o;
 	ray.d = dir;

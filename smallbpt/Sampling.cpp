@@ -8,12 +8,12 @@ Vec3 UniformSampleDisk(const Vec3 &u) {
 	return Vec3(r * std::cos(theta), r * std::sin(theta));
 }
 
-Vec3 ConcentricSampleDisk(const Vec3 &u) {
+Vec2 ConcentricSampleDisk(const Vec2 &u) {
 	// Map uniform random numbers to $[-1,1]^2$
-	Vec3 uOffset = 2.f * u - Vec3(1, 1);
+	Vec2 uOffset = 2.0 * u - Vec2(1, 1);
 
 	// Handle degeneracy at the origin
-	if (uOffset.x == 0 && uOffset.y == 0) return Vec3(0, 0);
+	if (uOffset.x == 0 && uOffset.y == 0) return Vec2(0, 0);
 
 	// Apply concentric mapping to point
 	double theta, r;
@@ -25,7 +25,7 @@ Vec3 ConcentricSampleDisk(const Vec3 &u) {
 		r = uOffset.y;
 		theta = PiOver2 - PiOver4 * (uOffset.x / uOffset.y);
 	}
-	return r * Vec3(std::cos(theta), std::sin(theta));
+	return r * Vec2(std::cos(theta), std::sin(theta));
 }
 
 Vec3 UniformSampleHemisphere(const Vec3 &u) {
@@ -65,8 +65,7 @@ double UniformConePdf(double cosThetaMax) {
 	return 1 / (2 * PI * (1 - cosThetaMax));
 }
 
-Vec3 UniformSampleTriangle(const Vec3& u)
-{
-	double su0 = std::sqrt(u[0]);
-	return Vec3(1 - su0, u[1] * su0, 0);
+Vec2 UniformSampleTriangle(const Vec2& u) {
+	double su0 = std::sqrt(u.x);
+	return Vec2(1 - su0, u.y * su0);
 }

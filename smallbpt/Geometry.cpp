@@ -9,6 +9,10 @@ Vec3 operator*(double a, const Vec3 &b) {
 	return Vec3(a * b.x, a * b.y, a * b.z);
 }
 
+Vec2 operator*(double a, const Vec2& b) {
+	return Vec2(a * b.x, a * b.y);
+}
+
 void Normalize(Vec3 &a) {
 	a = a / a.length();
 }
@@ -42,13 +46,13 @@ bool Triangle::intersect(const Ray& ray, Intersection* isect, double* t) {
 	isect->HitPoint = (1 - b1 - b2) * p0 + b1 * p1 + b2 * p2;
 	isect->b1 = b1;
 	isect->b2 = b2;
-
+	isect->SurfaceNormal = normal;
 	return true;
 }
 
-Intersection Triangle::Sample(double* pdf, const Vec3& u)
+Intersection Triangle::Sample(double* pdf, const Vec2& u)
 {
-	Vec3 b = UniformSampleTriangle(u);
+	Vec2 b = UniformSampleTriangle(u);
 	Intersection isect;
 	isect.HitPoint = b[0] * p0 + b[1] * p1 + (1 - b[0] - b[1]) * p2;
 	isect.Normal = normal;
@@ -56,7 +60,3 @@ Intersection Triangle::Sample(double* pdf, const Vec3& u)
 	return isect;
 }
 
-Intersection Shape::Sample(double* pdf, const Vec3& u) {
-	Intersection isect;
-	return isect;
-}

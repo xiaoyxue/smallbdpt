@@ -37,11 +37,29 @@ void SceneOne() {
 	//pt.Render(scene, camera);
 }
 
+void SceneTwo() {
+	int resX = 1024, resY = 1024;
+	std::string filename = "Result/Image9.png";
+	Film film(resX, resY, filename);
+	Camera camera;
+	Vec3 camPos(0, 0, 3);
+	Vec3 d = Vec3(0, 0, -1);
+	Vec3 v(0, 1, 0);
+	Vec3 u(1, 0, 0);
+	double fovy = 53.13010235415597f;
+	camera.SetCamera(camPos, d, u, v, 1, fovy);
+	camera.film = &film;
+	camera.Init();
+	Sampler sampler;
+	Scene scene;
+
+	BidirectionalPathTracing bpt(&sampler, 16, 32, false, false);
+	bpt.Render(scene, camera);
+}
 
 int main() {
 	
-	SceneOne();
-
+	SceneTwo();
 	
 	return 0;
 }

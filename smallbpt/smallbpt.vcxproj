@@ -160,6 +160,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightTracing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PathTracing.cpp" />
@@ -179,7 +180,6 @@
     <ClInclude Include="LightTracing.h" />
     <ClInclude Include="PathTracing.h" />
     <ClInclude Include="PathVertex.h" />
-    <ClInclude Include="pbrtrng.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Rng.h" />
     <ClInclude Include="Sampler.h" />
@@ -188,6 +188,7 @@
     <ClInclude Include="ScopedAssignment.h" />
     <ClInclude Include="Smallbpt.h" />
     <ClInclude Include="Threading.h" />
+    <ClInclude Include="Tramsform.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="svpng.inc" />

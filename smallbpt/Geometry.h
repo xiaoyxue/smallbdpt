@@ -6,6 +6,40 @@
 #include <string>
 #include <iostream>
 
+struct Vec2 {
+	Vec2(double x_ = 0, double y_ = 0) : x(x_), y(y_) {}
+
+	double x, y;
+
+	inline double& operator[](int i) {
+		if (i == 0) return x;
+		if (i == 1) return y;
+	}
+
+	inline Vec2 operator+(const Vec2& b) const {
+		return Vec2(x + b.x, y + b.y);
+	}
+	inline Vec2 operator-(const Vec2& b) const {
+		return Vec2(x - b.x, y - b.y);
+	}
+	inline Vec2 operator*(double c) const {
+		return Vec2(c * x, c * y);
+	}
+	inline Vec2 operator/(double c) const {
+		if (std::abs(c - 0.f) < eps) return Vec2(0.f, 0.f);
+		return Vec2(x / c, y / c);
+	}
+	inline Vec2& operator+=(const Vec2& b) {
+		x += b.x;
+		y += b.y;
+		return *this;
+	}
+	inline Vec2& operator-=(const Vec2& b) {
+		x -= b.x;
+		y -= b.y;
+		return *this;
+	}
+};
 
 struct Vec3 {        // Usage: time ./explicit 16 && xv image.ppm
 	double x, y, z;
@@ -104,6 +138,7 @@ typedef Vec3 Color;
 
 Vec3 operator*(const Vec3 &a, const Vec3 &b);
 Vec3 operator*(double a, const Vec3 &);
+Vec2 operator*(double a, const Vec2&);
 void Normalize(Vec3 &Vec3);
 
 inline double dot(const Vec3 &a, const Vec3& b) {
@@ -135,7 +170,7 @@ class Intersection;
 class Shape {
 public:
 	virtual double Area() = 0;
-	virtual Intersection Sample(double* pdf, const Vec3& u);
+	virtual Intersection Sample(double* pdf, const Vec2& u) = 0;
 };
 
 class Sphere : Shape{
@@ -164,15 +199,14 @@ public:
 
 class Triangle : public Shape {
 public:
-	Triangle(Vec3 p0_, Vec3 p1_, Vec3 p2_, Vec3 normal_, Vec3 color_, Refl_t refl_)
-		: p0(p0_), p1(p1_), p2(p2_), normal(normal_), color(color_), refl(refl_)
+	Triangle(Vec3 p0_, Vec3 p1_, Vec3 p2_, Vec3 normal_, Vec3 color_, Vec3 emissive_, Refl_t refl_)
+		: p0(p0_), p1(p1_), p2(p2_), normal(normal_), color(color_), emissive(emissive_), refl(refl_)
 	{
 		Vec3 e1 = p1 - p0;
 		Vec3 e2 = p2 - p0;
 	}
 
 	bool intersect(const Ray& ray, Intersection* isect, double* t);
-
 
 	bool intersect(const Ray& ray) const {
 		Vec3 s1 = cross(ray.d, e2);
@@ -210,12 +244,13 @@ public:
 		return e1.cross(e2).length() * 0.5;
 	}
 
-	Intersection Sample(double* pdf, const Vec3& u) override;
+	Intersection Sample(double* pdf, const Vec2& u) override;
 
 	Vec3 p0, p1, p2;
 	Vec3 e1, e2;
 	Vec3 normal;
 	Vec3 color;
+	Vec3 emissive;
 	Refl_t refl;
 };
 
