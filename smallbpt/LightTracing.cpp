@@ -1,35 +1,37 @@
 #include "LightTracing.h"
 #include "Scene.h"
 #include "Sampling.h"
-#include "Intersect.h"
+#include "Intersection.h"
 #include "iostream"
 #include "Smallbpt.h"
 
-void LightTracing::Render() {
-	int NtotalSample = spp * camera->film->width * camera->film->heigh;
+void LightTracing::Render(const Scene &scene, const Camera &camera) {
+	int64_t resX = camera.GetFilm()->resX;
+	int64_t resY = camera.GetFilm()->resY;
+	int nTotalSamples = spp * resX * resY;
 //#pragma omp parallel for schedule(dynamic, 1)
-	for (int p = 0; p < NtotalSample; ++p) {
-		int nVertex = GenerateLightPath(*sampler, LightPath, maxDepth);
+	for (int p = 0; p < nTotalSamples; ++p) {
+		int nVertex = GenerateLightPath(scene, *sampler, LightPath, maxDepth);
 		for (int s = 0; s < nVertex; ++s) {
 			Vec3 pRaster;
 			bool inScreen;
-			Vec3 L = ConnectToCamera(LightPath[s], s, *camera, &pRaster, &inScreen);
+			Vec3 L = ConnectToCamera(scene, LightPath[s], s, camera, &pRaster, &inScreen);
 			if (inScreen) {
 				//L = L * camera->film->Area / NtotalSample;
-				L = L * camera->film->width * camera->film->heigh / NtotalSample;
+				L = L * resX * resY / nTotalSamples;
 				//L = L / spp;
 				L = Vec3(clamp(L.x), clamp(L.y), clamp(L.z));
-				camera->film->AddSplat(pRaster, L);
+				camera.GetFilm()->AddSplat(pRaster, L);
 			}
 		}
 	}
-	camera->film->WriteToImage();
+	camera.GetFilm()->WriteToImage();
 	
 }
 
 
-int LightTracing::GenerateLightPath(Sampler &sampler, std::vector<PathVertex> &LightPath, int maxdepth) {
-	Sphere light = spheres[numSpheres - 1];
+int LightTracing::GenerateLightPath(const Scene &scene, Sampler &sampler, std::vector<PathVertex> &lightPath, int maxdepth) {
+	Sphere light = Scene::spheres[Scene::numSpheres - 1];
 	Vec3 Le = light.e;
 	//sample a position
 	Vec3 pos = UniformSampleSphere(sampler.Get2D()) * light.rad + light.p;
@@ -42,35 +44,35 @@ int LightTracing::GenerateLightPath(Sampler &sampler, std::vector<PathVertex> &L
 	Vec3 lightDir = (ss * dirLocal.x + ts * dirLocal.y + lightNorm * dirLocal.z).norm();
 	double Pdfdir = CosineHemispherePdf(CosTheta);
 	Ray ray(pos + lightDir * eps, lightDir);
-	LightPath[0].isect.HitPoint = pos;
-	LightPath[0].isect.Normal = (pos - light.p).norm();
-	LightPath[0].Throughput = Le; // / Pdfdir / Pdfpos * CosTheta;
-	LightPath[0].PdfFwd = Pdfpos;
-	LightPath[0].isect.Delta = false;
-	Vec3 Throughput = LightPath[0].Throughput * CosTheta / Pdfpos / Pdfdir;
+	lightPath[0].isect.HitPoint = pos;
+	lightPath[0].isect.Normal = (pos - light.p).norm();
+	lightPath[0].mThroughput = Le; // / Pdfdir / Pdfpos * CosTheta;
+	lightPath[0].mPdfFwd = Pdfpos;
+	lightPath[0].isect.Delta = false;
+	Vec3 Throughput = lightPath[0].mThroughput * CosTheta / Pdfpos / Pdfdir;
 
 #ifdef _DEBUG
 	//std::cout << LightPath[0].Throughput.x << " " << LightPath[0].Throughput.y << " " << LightPath[0].Throughput.z << std::endl;
 #endif
 
-	return Trace(ray, Throughput, Pdfdir, sampler, LightPath, 1, maxdepth);
+	return Trace(scene, ray, Throughput, Pdfdir, sampler, lightPath, 1, maxdepth);
 }
 
-int LightTracing::Trace(const Ray &ray, Vec3 Throughput, double PdfFwd, Sampler &sampler, std::vector<PathVertex> &LightPath, int depth, int maxDepth) {
+int LightTracing::Trace(const Scene &scene, const Ray &ray, Vec3 Throughput, double PdfFwd, Sampler &sampler, std::vector<PathVertex> &LightPath, int depth, int maxDepth) {
 	double pdfdir = PdfFwd;
 	Ray r = ray;
 	int bound = depth;
 	double PdfW = PdfFwd;
 	while (1) {
-		Intersect &isect = LightPath[bound].isect;
+		Intersection &isect = LightPath[bound].isect;
 		double t;
 		int id;
-		if (!intersect(r, t, id, isect)) break;
+		if (!scene.intersect(r, t, id, isect)) break;
 #ifdef _DEBUG
 		//std::cout << id << std::endl;
 #endif
-		LightPath[bound].Throughput = Throughput;
-		LightPath[bound].PdfFwd = PdfW;
+		LightPath[bound].mThroughput = Throughput;
+		LightPath[bound].mPdfFwd = PdfW;
 #ifdef _DEBUG
 		//std::cout << Throughput.x << " " << Throughput.y << " " << Throughput.z << std::endl;
 #endif
@@ -91,7 +93,7 @@ int LightTracing::Trace(const Ray &ray, Vec3 Throughput, double PdfFwd, Sampler 
 }
 
 
-Vec3 LightTracing::ConnectToCamera(const PathVertex &Vertex, int s, const Camera &camera, Vec3 *pRaster, bool *inScreen) {
+Vec3 LightTracing::ConnectToCamera(const Scene &scene, const PathVertex &Vertex, int s, const Camera &camera, Vec3 *pRaster, bool *inScreen) {
 	if (Vertex.isect.Delta) return Vec3(0.0, 0.0, 0.0);
 
 	*inScreen = true;
@@ -111,27 +113,19 @@ Vec3 LightTracing::ConnectToCamera(const PathVertex &Vertex, int s, const Camera
 	}
 	
 	Ray ray(Vertex.isect.HitPoint, dirHitPointToCam, 0.f, ray_tmax);
-	Intersect isc; 
+	Intersection isc;
 	double t; int id;
-#ifdef _DEBUG
-	if (intersect(ray, id)) {
-#else
-	if (intersect(ray)){
-#endif
-		//std::cout << "tmax: " << ray_tmax << ", t: " << t << std::endl;
-#ifdef _DEBUG
-		std::cout << "HitPointid : " << Vertex.isect.id << ", id : " << id << std::endl;
-#endif
+	if (scene.intersect(ray)){
 		*inScreen = false;
 		return Vec3(0.0, 0.0, 0.0);
 	}
 	if (s == 0) {
-		return Vertex.Throughput; //see the light source directly
+		return Vertex.mThroughput; //see the light source directly
 	}
 	double PdfW;
 	Vec3 wi;
 	Vec3 We = camera.Sample_Wi(Vertex.isect, &PdfW, &wi);
 	Vec3 f = Vertex.isect.bsdf->f(Vertex.isect.wo, wi);
-	Vec3 L = We * Vertex.Throughput * f * wi.dot(Vertex.isect.Normal) / PdfW;
+	Vec3 L = We * Vertex.mThroughput * f * wi.dot(Vertex.isect.Normal) / PdfW;
 	return L;
 } 

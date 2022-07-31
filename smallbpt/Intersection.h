@@ -5,7 +5,8 @@
 #include "BSDF.h"
 #include "Smallbpt.h"
 
-struct Intersect {
+class Intersection {
+public:
 #ifdef _DEBUG
 	int id;
 #endif
@@ -15,8 +16,9 @@ struct Intersect {
 	Vec3 wo;
 	bool Delta;
 	bool IsLight;
+	double b1, b2;
 	std::shared_ptr<BSDF> bsdf;
-	Intersect() {
+	Intersection() {
 		IsLight = false;
 		Delta = false;
 	}
