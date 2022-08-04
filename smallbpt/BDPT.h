@@ -26,27 +26,72 @@ private:
 	//std::vector<PathVertex> LightPath;
 };
 
-int GenerateLightPath(const Scene& scene, Sampler &sampler, std::vector<PathVertex> &LightPath, int maxdepth);
+int GenerateLightPath(
+	const Scene					&scene, 
+	Sampler						&sampler, 
+	std::vector<PathVertex>		&lightPath, 
+	int							maxdepth);
 
-int GenerateCameraPath(const Scene& scene, const Camera& camera, Sampler &sampler, std::vector<PathVertex> &CameraPath, const Ray &cameraRay, int maxdepth);
+int GenerateCameraPath(
+	const Scene					&scene, 
+	const Camera				&camera,
+	Sampler						&sampler, 
+	std::vector<PathVertex>		&cameraPath, 
+	const Ray					&cameraRay,
+	int							maxdepth);
 
-int Trace(const Scene& scene, const Ray &ray, Vec3 Throughput, double PdfFwd, Sampler &sampler,
-	std::vector<PathVertex> &Path, int depth, int maxDepth);
+int Trace(
+	const Scene					&scene, 
+	const Ray					&ray, 
+	Vec3						throughput, 
+	double						pdfFwd, 
+	Sampler						&sampler,
+	std::vector<PathVertex>		&path, 
+	int							depth, 
+	int							maxDepth);
 
-Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, 
-	std::vector<PathVertex>& LightPath, std::vector<PathVertex>& CameraPath, int s, int t, Vec3* pRaster, bool* inScreen, double* MISRecord);
+Vec3 ConnectBDPT(
+	const Scene					&scene, 
+	const Camera				&camera, 
+	Sampler						&sampler, 
+	std::vector<PathVertex>		&lightPath, 
+	std::vector<PathVertex>		&cameraPath, 
+	int							s, 
+	int							t, 
+	Vec3						*pRaster, 
+	bool						*inScreen, 
+	double						*misRecord);
 
-double ConvertSolidToArea(double PdfW, const PathVertex &Vertex, const PathVertex &nxt);
+double ConvertSolidToArea(
+	double						pdfW, 
+	const PathVertex			&vertex, 
+	const PathVertex			&nextVertex);
 
-double G(const PathVertex &VertexA, const PathVertex &VertexB);
+double G(
+	const PathVertex			&vertexA, 
+	const PathVertex			&vertexB);
 
-bool IsConnectable(const Scene& scene, const Vec3 &PointA, const Vec3 &PointB);
+bool IsConnectable(
+	const Scene					&scene, 
+	const Vec3					&pointA, 
+	const Vec3					&pointB);
 
-double MISWeight(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &CameraPath,
-	int s, int t, PathVertex &sampled);
+double MISWeight(
+	std::vector<PathVertex>		&lightPath, 
+	std::vector<PathVertex>		&cameraPath,
+	int							s, 
+	int							t, 
+	PathVertex					&sampled);
 
-double MISWeight2(std::vector<PathVertex> &LightPath, std::vector<PathVertex> &CameraPath,
-	int s, int t, PathVertex &sampled);
+double MISWeight2(
+	std::vector<PathVertex>		&lightPath, 
+	std::vector<PathVertex>		&cameraPath,
+	int							s, 
+	int							t, 
+	PathVertex					&sampled);
 
-double Path_Pdf(const std::vector<PathVertex> &Path, int s, int t);
+double Path_Pdf(
+	const std::vector<PathVertex> &path, 
+	int							  s, 
+	int							  t);
 #endif
