@@ -4,13 +4,18 @@
 #include "Geometry.h"
 #include "Intersection.h"
 
+class Light;
 class Scene {
 public:
 	static int numSpheres;
 	static Sphere spheres[];
-	bool intersect(const Ray& r, double& t, int& id, Intersection& isect) const;
-	bool intersect(const Ray& r) const;
 
+	static std::vector<Shape*> shapes;
+	static std::vector<Light*> lights;
+
+	bool Intersect(const Ray& r, double& t, Intersection& isect) const;
+	bool Intersect(const Ray& r) const;
+	Light* SampleOneLight(double* pdfLight, double u) const;
 };
 
 

@@ -13,7 +13,7 @@
 void SceneOne() {
 	int width = 1024, height = 768;
 
-	std::string filename = "Result/Image2.png";
+	std::string filename = "Result/Image7.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(50, 52, 295.6), d(0, -0.042612, -1);

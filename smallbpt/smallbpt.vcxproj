@@ -160,6 +160,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightTracing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PathTracing.cpp" />

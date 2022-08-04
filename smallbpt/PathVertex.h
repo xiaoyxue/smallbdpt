@@ -4,11 +4,13 @@
 #include "Geometry.h"
 #include "Camera.h"
 
-struct PathVertex {
+class PathVertex {
+public:
 	Intersection isect;
 	Vec3 mThroughput;
 	double mPdfFwd = 0.0, mPdfPrev = 0.0;
 	Camera *mpCamera;
+	Light* mpLight;
 };
 
 
