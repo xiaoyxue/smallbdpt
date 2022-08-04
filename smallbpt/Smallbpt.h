@@ -4,15 +4,24 @@
 #include <memory>
 #include <limits>
 
-const double eps = 10e-6;
-const double PI = 3.14159265358979323846;
-const double INV_PI = 0.31830988618379067154;
-const double INV2PI = 0.15915494309189533577;
-const double INV4PI = 0.07957747154594766788;
-const double PiOver2 = 1.57079632679489661923;
-const double PiOver4 = 0.78539816339744830961;
-const double Sqrt2 = 1.41421356237309504880;
-const double Inf = 1e20;
+
+constexpr double PI = 3.14159265358979;
+constexpr double INV_PI = 0.31830988618379067154;
+constexpr double INV_2PI = 0.15915494309189533577;
+constexpr double INV_4PI = 0.07957747154594766788;
+constexpr double PI_Over2 = 1.57079632679489661923;
+constexpr double PI_Over4 = 0.78539816339744830961;
+constexpr double Eps = 1e-6;
+constexpr double Inf = std::numeric_limits<double>::infinity();
+constexpr double RayEps = 1e-4;
+constexpr double ShadowRayEps = 1e-4;
+constexpr double PhtotonEdgeEps = 0.0009;
+constexpr double NumericalEps = 1e-6;
+constexpr double MachineEps = std::numeric_limits<double>::epsilon() * 0.5;
+constexpr double MaxReal = std::numeric_limits<double>::max();
+constexpr double Infinity = std::numeric_limits<double>::infinity();
+constexpr double eps = 1e-5;
+
 
 inline double clamp(double x) { return x<0 ? 0 : x>1 ? 1 : x; }
 

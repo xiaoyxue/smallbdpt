@@ -6,6 +6,8 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include "Utils.h"
+
 inline double CosTheta(const Vec3 &wo) {
 	return std::abs(wo.z);
 }
@@ -50,7 +52,7 @@ class LambertianBSDF : public BSDF {
 public:
 	LambertianBSDF(){}
 	LambertianBSDF(Vec3 normal, Vec3 surfacenorm, Vec3 r) : BSDF(normal, surfacenorm), R(r) {}
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		Vec3 wiLocal = CosineSampleHemisphere(u);
 		//*pdf = PdfInner(woLocal, wiLocal);
@@ -123,7 +125,7 @@ private:
 class SpecularReflection : public BSDF {
 public:
 	SpecularReflection(Vec3 normal, Vec3 surfacenorm, Vec3 r) : BSDF(normal, surfacenorm), R(r) {}
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		Vec3 wiLocal(-1 * woLocal.x, -1 * woLocal.y, woLocal.z);
 		*wi = this->LocalToWorld(wiLocal);
@@ -144,7 +146,7 @@ public:
 	SpecularTransmission(Vec3 normal, Vec3 surfacenorm, Vec3 t, double _eta0 = 1.0, double _eta1 = 1.5) :
 		BSDF(normal, surfacenorm), T(t), eta0(_eta0), eta1(_eta1), fresnel(_eta0, _eta1){}
 
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		double cosTheta = CosTheta(woLocal);
 		double entering = ns.dot(surfaceNormal) > 0;

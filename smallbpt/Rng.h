@@ -13,7 +13,7 @@ public:
 		return mDistInt(mRng);
 	}
 
-	double Getdouble()
+	double GetFloat()
 	{
 		//return (double)(std::rand()) / RAND_MAX;
 

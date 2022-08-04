@@ -3,19 +3,21 @@
 #include "Scene.h"
 #include "LightTracing.h"
 #include "Sampling.h"
-#include "string"
+#include <string>
+#include "Utils.h"
+#include "Sampling.h"
 
 int GenerateLightPath(const Scene& scene, Sampler &sampler, std::vector<PathVertex> &LightPath, int maxdepth) {
 	if (maxdepth == 0) return 0;
 	Sphere light = Scene::spheres[Scene::numSpheres - 1];
 	Vec3 Le = light.e;
 	//sample a position
-	Vec3 pos = UniformSampleSphere(sampler.Get2D()) * light.rad + light.p;
+	Vec3 pos = UniformSampleSphere(sampler.Get3D()) * light.rad + light.p;
 	double Pdfpos = 1.f / (4 * PI * light.rad * light.rad);
 	Vec3 lightNorm = (pos - light.p).norm();
 	Vec3 ss, ts;
 	CoordinateSystem(lightNorm, &ss, &ts);
-	Vec3 dirLocal = CosineSampleHemisphere(sampler.Get2D());
+	Vec3 dirLocal = CosineSampleHemisphere(sampler.Get3D());
 	double CosTheta = dirLocal.z;
 	Vec3 lightDir = (ss * dirLocal.x + ts * dirLocal.y + lightNorm * dirLocal.z).norm();
 	double Pdfdir = CosineHemispherePdf(CosTheta);
@@ -65,7 +67,7 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 Throughput, double PdfFwd, Sa
 		if (bound >= maxDepth + 1) break;
 
 		Vec3 wo;
-		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &PdfW, sampler.Get2D());
+		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &PdfW, sampler.Get3D());
 		wo.norm();
 		Throughput = Throughput * f * (std::abs(wo.dot(isect.Normal))) / PdfW;
 
@@ -393,7 +395,7 @@ Vec3 ConnectBDPT(const Scene &scene, const Camera& camera, Sampler& sampler, std
 
 			double SinThetaMax = light.rad / (light.p - CameraVertex.isect.HitPoint).length();
 			double CosThetaMax = std::sqrt(1 - SinThetaMax * SinThetaMax);
-			Vec3 wi = UniformSampleCone(sampler.Get2D(), CosThetaMax, localX, localY, localZ);
+			Vec3 wi = UniformSampleCone(sampler.Get3D(), CosThetaMax, localX, localY, localZ);
 			double PdfW = UniformConePdf(CosThetaMax);
 
 			//calculate the hit point and normal
@@ -458,7 +460,7 @@ Vec3 ConnectBDPT(const Scene &scene, const Camera& camera, Sampler& sampler, std
 		
 	}
 	double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(LightPath, CameraPath, s, t, sampled));
-	double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t, sampled));
+	//double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(LightPath, CameraPath, s, t, sampled));
 	//std::cout << "MIS: " << MIS << " MIS2: " << MIS2 << std::endl;
 	L = MIS * L;
 	if (MISRecord) *MISRecord = MIS;
@@ -497,7 +499,6 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 		std::vector<PathVertex> LightPath(mMaxDepth + 1);
 		std::vector<PathVertex> CameraPath(mMaxDepth + 2);
 		for (int x = 0; x < resX; ++x) {
-			//fprintf(stderr, "\rRendering %5.2f%%", (1.0 * y * film->width + x) / film->width / film->heigh * 100.0);
 			Vec3 L(0, 0, 0);
 			for (int spp = 0; spp < mSpp; ++spp) {
 				double u = mpSampler->Get1D() - 0.5f;
@@ -513,34 +514,9 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 
 
 				Ray cameraRay(camera.o, d);
-				//std::vector<PathVertex> LightPath(maxDepth + 1);
-				//std::vector<PathVertex> CameraPath(maxDepth + 2);
 				int nLightVertex = GenerateLightPath(scene, *mpSampler, LightPath, mMaxDepth + 1);
 				int nCameraVertex = GenerateCameraPath(scene, camera, *mpSampler, CameraPath, cameraRay, mMaxDepth + 2);
-#ifdef _DEBUG
-				/*
-				
-				std::cout << std::endl;
-				for (int i = 0; i < nLightVertex; ++i) {
-					std::cout << "LightPath[" << i << "], "
-						<< "HitPoint: " << LightPath[i].isect.HitPoint
-						<< ", Normal: " << LightPath[i].isect.Normal
-						<< ", Delta: " << (LightPath[i].isect.Delta ? "true" : "false")
-						//<< ", Throughtput: " << LightPath[i].Throughput
-						<< ", PdfFwd: " << LightPath[i].PdfFwd 
-						<< ", PdfPrev: " << LightPath[i].PdfPrev << std::endl;
-				}
-				std::cout << std::endl;
-				for (int i = 0; i < nCameraVertex; ++i) {
-					std::cout << "CameraPath[" << i << "], "
-						<< "HitPoint: " << CameraPath[i].isect.HitPoint
-						<< ", Normal: " << CameraPath[i].isect.Normal
-						<< ", Delta: " << (CameraPath[i].isect.Delta ? "true" : "false")
-						//<< ", Throughtput: " << CameraPath[i].Throughput
-						<< ", PdfFwd: " << CameraPath[i].PdfFwd
-						<< ", PdfPrev: " << CameraPath[i].PdfPrev << std::endl;
-				}*/
-#endif
+
 				bool inScreen = false;
 				for (int t = 1; t <= nCameraVertex; ++t) {
 					for (int s = 0; s <= nLightVertex; ++s) {
@@ -552,17 +528,7 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 						Vec3 pRaster = Vec3(x, y);
 						Vec3 pFilmNew = Vec3(x, y);
 						Vec3 Lpath = ConnectBDPT(scene, camera, *mpSampler, LightPath, CameraPath, s, t, &pRaster, &inScreen, &misRecord);
-#ifdef _DEBUG
-						/*
-						std::cout << "s:" << s << ",  t:" << t << std::endl;
-						for (int i = 0; i < t; ++i) {
-							std::cout << "i = " << i << " Throughput=" << CameraPath[i].Throughput;
-							std::cout << " IsDelta:" << (CameraPath[i].isect.Delta ? 1 : 0)
-								<< " PdfFwd: " << CameraPath[i].PdfFwd << " PdfPrev: " << CameraPath[i].PdfPrev << std::endl;
-						}
-						std::cout << "mis : " << misRecord << ", L" << Lpath << std::endl<<std::endl;
-						*/
-#endif
+
 						if (mVisualizeStrategies || mVisualizeWeight) {
 							if (t == 1 && inScreen) pFilmNew = pRaster;
 							Vec3 value;
@@ -577,19 +543,17 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 						else {
 							if (inScreen) {
 								Lpath = Lpath * film->resX * film->resY / totalLightSamples;
-								//Lpath = Vec3(clamp(Lpath.x), clamp(Lpath.y), clamp(Lpath.z));
+
 								film->AddSplat(pRaster, Lpath);
 							}
 						}
 					}
 				}
 			}
-			//L = Vec3(clamp(L.x), clamp(L.y), clamp(L.z));
 			film->AddSample(Vec3(x, y), L);
 		}
 	}
 	film->WriteToImage();
-	//camera->film->WriteToVisualImage();
 	if (mVisualizeStrategies || mVisualizeWeight) {
 		for (int i = 0; i < weightFilms.size(); ++i) {
 			if (weightFilms[i]) weightFilms[i]->WriteToImage();

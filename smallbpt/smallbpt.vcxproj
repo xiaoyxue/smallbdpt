@@ -177,9 +177,9 @@
     <ClInclude Include="Intersection.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightTracing.h" />
+    <ClInclude Include="Linagl.h" />
     <ClInclude Include="PathTracing.h" />
     <ClInclude Include="PathVertex.h" />
-    <ClInclude Include="pbrtrng.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Rng.h" />
     <ClInclude Include="Sampler.h" />
@@ -188,6 +188,7 @@
     <ClInclude Include="ScopedAssignment.h" />
     <ClInclude Include="Smallbpt.h" />
     <ClInclude Include="Threading.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="svpng.inc" />

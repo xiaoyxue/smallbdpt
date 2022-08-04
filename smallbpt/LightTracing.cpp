@@ -4,6 +4,7 @@
 #include "Intersection.h"
 #include "iostream"
 #include "Smallbpt.h"
+#include "Utils.h"
 
 void LightTracing::Render(const Scene &scene, const Camera &camera) {
 	int64_t resX = camera.GetFilm()->resX;
@@ -34,12 +35,12 @@ int LightTracing::GenerateLightPath(const Scene &scene, Sampler &sampler, std::v
 	Sphere light = Scene::spheres[Scene::numSpheres - 1];
 	Vec3 Le = light.e;
 	//sample a position
-	Vec3 pos = UniformSampleSphere(sampler.Get2D()) * light.rad + light.p;
+	Vec3 pos = UniformSampleSphere(sampler.Get3D()) * light.rad + light.p;
 	double Pdfpos = 1.f / (4 * PI * light.rad * light.rad);
 	Vec3 lightNorm = (pos - light.p).norm();
 	Vec3 ss, ts;
 	CoordinateSystem(lightNorm, &ss, &ts);
-	Vec3 dirLocal = CosineSampleHemisphere(sampler.Get2D());
+	Vec3 dirLocal = CosineSampleHemisphere(sampler.Get3D());
 	double CosTheta = dirLocal.z;
 	Vec3 lightDir = (ss * dirLocal.x + ts * dirLocal.y + lightNorm * dirLocal.z).norm();
 	double Pdfdir = CosineHemispherePdf(CosTheta);
@@ -80,7 +81,7 @@ int LightTracing::Trace(const Scene &scene, const Ray &ray, Vec3 Throughput, dou
 		if (bound >= maxDepth + 1) break;
 
 		Vec3 wo;
-		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &PdfW, sampler.Get2D());
+		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &PdfW, sampler.Get3D());
 		wo.norm();
 		Throughput = Throughput * f * (wo.dot(isect.Normal)) / PdfW;
 

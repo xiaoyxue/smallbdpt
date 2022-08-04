@@ -5,6 +5,7 @@
 #include "BSDF.h"
 #include "Smallbpt.h"
 
+class BSDF;
 class Intersection {
 public:
 #ifdef _DEBUG

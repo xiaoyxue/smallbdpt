@@ -1,18 +1,6 @@
 #include "Geometry.h"
 #include "Intersection.h"
 
-Vec3 operator*(const Vec3 &a, const Vec3 &b) {
-	return Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
-}
-
-Vec3 operator*(double a, const Vec3 &b) {
-	return Vec3(a * b.x, a * b.y, a * b.z);
-}
-
-void Normalize(Vec3 &a) {
-	a = a / a.length();
-}
-
 bool Triangle::intersect(const Ray& ray, Intersection* isect, double* t) {
 	Vec3 s1 = cross(ray.d, e2);
 	double divisor = dot(s1, e1);
@@ -45,8 +33,7 @@ bool Triangle::intersect(const Ray& ray, Intersection* isect, double* t) {
 
 	return true;
 }
-
-Intersection Triangle::Sample(double* pdf, const Vec3& u)
+Intersection Triangle::Sample(double* pdf, const Vec3& u) const
 {
 	Vec3 b = UniformSampleTriangle(u);
 	Intersection isect;
@@ -56,7 +43,16 @@ Intersection Triangle::Sample(double* pdf, const Vec3& u)
 	return isect;
 }
 
-Intersection Shape::Sample(double* pdf, const Vec3& u) {
+Intersection Sphere::Sample(double* pdf, const Vec3& u) const
+{
+	*pdf = 1.0 / Area();
+	Vec3 samplePoint = UniformSampleSphere(u);
+	Vec3 dir = samplePoint - p;
+	Vec3 scaledDir = rad * dir;
+	Vec3 point = p + scaledDir;
 	Intersection isect;
+	isect.HitPoint = point;
+	isect.Normal = (point - p).norm();
+	isect.SurfaceNormal = isect.Normal;
 	return isect;
 }

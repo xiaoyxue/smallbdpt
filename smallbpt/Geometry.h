@@ -5,119 +5,13 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include "Linagl.h"
 
-
-struct Vec3 {        // Usage: time ./explicit 16 && xv image.ppm
-	double x, y, z;
-	
-	Vec3(double xx = 0.f, double yy = 0.f, double zz = 0.f) : x(xx), y(yy), z(zz) {}
-	Vec3(const Vec3 &b) : x(b.x), y(b.y), z(b.z) {}
-	inline Vec3& operator=(const Vec3 &b) {
-		x = b.x; y = b.y; z = b.z;
-		return *this;
-	}
-	inline Vec3 operator+(const Vec3 &b) const {
-		return Vec3(x + b.x, y + b.y, z + b.z);
-	}
-	inline Vec3 operator-(const Vec3 &b) const {
-		return Vec3(x - b.x, y - b.y, z - b.z);
-	}
-	inline Vec3 operator*(double c) const {
-		return Vec3(c * x, c * y, c * z);
-	}
-	inline Vec3 operator/(double c) const {
-		if (std::abs(c - 0.f) < eps) return Vec3(0.f, 0.f, 0.f);
-		return Vec3(x / c, y / c, z / c);
-	}
-	inline Vec3& operator+=(const Vec3 &b) {
-		x += b.x;
-		y += b.y;
-		z += b.z;
-		return *this;
-	}
-	inline Vec3& operator-=(const Vec3 &b) {
-		x -= b.x;
-		y -= b.y;
-		z -= b.z;
-		return *this;
-	}
-
-	inline bool operator==(const Vec3 &b) const {
-		if (x == b.x && y == b.y && z == b.z) return true;
-		return false;
-	}
-
-	inline bool operator!=(const Vec3 &b) const {
-		if (x != b.x) return true;
-		if (y != b.y) return true;
-		if (z != b.z) return true;
-		return false;
-	}
-
-	inline double dot(const Vec3 &b) const {
-		return x * b.x + y * b.y + z * b.z;
-	}
-
-	inline Vec3 operator%(const Vec3 &b) const {
-		return Vec3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
-	}
-
-	inline Vec3 cross(const Vec3& b) const {
-		return Vec3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
-	}
-
-	inline double operator[](int i) const {
-		if (i == 0) return x;
-		if (i == 1) return y;
-		return z;
-	}
-	inline double &operator[](int i) {
-		if (i == 0) return x;
-		if (i == 1) return y;
-		return z;
-	}
-	inline Vec3 mult(const Vec3 &b) const {
-		return Vec3(x * b.x, y * b.y, z * b.z);
-	}
-	double length() const {
-		return std::sqrt(x * x + y * y + z * z);
-	}
-	inline Vec3 norm() {
-		return *this = (*this) / length();
-	}
-	inline double maxComponentValue() const {
-		return std::max(x, std::max(y, z));
-	}
-	std::string ToString() const {
-		std::string ret = "(";
-		ret += std::to_string(x); ret += ", ";
-		ret += std::to_string(y); ret += ", ";
-		ret += std::to_string(z); ret += ")";
-		return ret;
-	}
-	friend std::ostream &operator<<(std::ostream &os, const Vec3 &v) {
-		return os << v.ToString();
-	}
-};
-
-typedef Vec3 Color;
-
-Vec3 operator*(const Vec3 &a, const Vec3 &b);
-Vec3 operator*(double a, const Vec3 &);
-void Normalize(Vec3 &Vec3);
-
-inline double dot(const Vec3 &a, const Vec3& b) {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-inline Vec3 cross(const Vec3 &a, const Vec3& b) {
-	return Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
-}
 
 class Ray {
 public:
 	Ray() : o(0.f, 0.f, 0.f), d(0.f, 0.f, 0.f) {}
-	Ray(Vec3 _o, Vec3 _d, double _tmin = eps, double _tmax = Inf) : 
+	Ray(Vec3 _o, Vec3 _d, double _tmin = Eps, double _tmax = Inf) : 
 		o(_o), d(_d), tmin(_tmin), tmax(_tmax) {}
 
 	Vec3 HitPoint(double t) const {
@@ -134,11 +28,11 @@ class Intersection;
 
 class Shape {
 public:
-	virtual double Area() = 0;
-	virtual Intersection Sample(double* pdf, const Vec3& u);
+	virtual double Area() const = 0;
+	virtual Intersection Sample(double* pdf, const Vec3& u) const = 0;;
 };
 
-class Sphere : Shape{
+class Sphere : public Shape{
 public:
 	double rad;       // radius
 
@@ -156,7 +50,9 @@ public:
 		return (t = b - det)>eps ? t : ((t = b + det)>eps ? t : 0);
 	}
 
-	double Area() {
+	Intersection Sample(double* pdf, const Vec3& u) const override;
+
+	double Area() const override {
 		return 4.0 * PI * rad * rad;
 	}
 };
@@ -206,11 +102,11 @@ public:
 		return true;
 	}
 
-	double Area() {
+	double Area() const override {
 		return e1.cross(e2).length() * 0.5;
 	}
 
-	Intersection Sample(double* pdf, const Vec3& u) override;
+	Intersection Sample(double* pdf, const Vec3& u) const override;
 
 	Vec3 p0, p1, p2;
 	Vec3 e1, e2;
@@ -220,13 +116,4 @@ public:
 };
 
 
-
-
-inline void CoordinateSystem(const Vec3 &v1, Vec3 *v2, Vec3 *v3) {
-	if (std::abs(v1.x) > std::abs(v1.y))
-		*v2 = Vec3(-v1.z, 0, v1.x) / std::sqrt(v1.x * v1.x + v1.z * v1.z);
-	else
-		*v2 = Vec3(0, v1.z, -v1.y) / std::sqrt(v1.y * v1.y + v1.z * v1.z);
-	*v3 = v1 % (*v2);
-}
 #endif
