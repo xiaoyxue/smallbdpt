@@ -17,7 +17,7 @@ Intersection Sphere::Sample(double* pdf, const Vec3& u) const
 
 bool Sphere::Intersect(const Ray& r, Intersection* isect, double* t) const
 {
-	*t = IntersectP(r);
+	*t = intersect(r);
 	if (*t <= 0) return false;
 	isect->HitPoint = r.HitPoint(*t);
 	isect->SurfaceNormal = (isect->HitPoint - p).Norm();
@@ -32,6 +32,15 @@ bool Sphere::Intersect(const Ray& r) const
 	if (det < 0) return 0; else det = sqrt(det);
 	t = (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
 	return t > 0;
+}
+
+double Sphere::intersect(const Ray& r) const
+{
+	Vec3 op = p - r.o; // Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0
+	double t, eps = 1e-4, b = op.Dot(r.d), det = b * b - op.Dot(op) + rad * rad;
+	if (det < 0) return 0; else det = sqrt(det);
+	double ret = (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
+	return ret;
 }
 
 double Sphere::IntersectP(const Ray& r) const
@@ -121,7 +130,7 @@ double Triangle::IntersectP(const Ray& ray) const
 	Vec3 s1 = Cross(ray.d, e2);
 	double divisor = Dot(s1, e1);
 
-	//std::cout << "divisor: " << divisor << std::endl;
+	std::cout << "divisor: " << divisor << std::endl;
 
 	if (divisor == 0.)
 		return false;
@@ -131,7 +140,7 @@ double Triangle::IntersectP(const Ray& ray) const
 	Vec3 s = ray.o - p0;
 	double b1 = Dot(s, s1) * invDivisor;
 
-	//std::cout << "b1: " << b1 << std::endl;
+	std::cout << "b1: " << b1 << std::endl;
 
 	if (b1 < 0. || b1 > 1.)
 		return false;

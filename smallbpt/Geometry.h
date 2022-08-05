@@ -80,7 +80,8 @@ public:
 	bool Intersect(const Ray& r) const override;
 
 	double IntersectP(const Ray& r) const override;
-
+private:
+	double intersect(const Ray& r) const;
 };
 
 

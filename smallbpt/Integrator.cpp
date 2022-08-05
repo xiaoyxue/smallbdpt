@@ -22,9 +22,8 @@ Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, 
 		pdfW = pdfA * dis * dis / std::abs(cosTheta1);
 		Vec3 f = hitPoint.bsdf->f(hitPoint.wo, hitToLight);
 		Ray shadowRay(hitPoint.HitPoint, hitToLight);
-		double t;
 		Intersection isect;
-		scene.Intersect(shadowRay, t, isect);
+		scene.Intersect(shadowRay, &isect);
 		if (!isect.IsLight || cosTheta1 < 0) {
 			return Vec3(0, 0, 0);
 		}

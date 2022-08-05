@@ -46,9 +46,9 @@ Vec3 SphereLight::DirectIllumination(const Scene& scene, Sampler& sampler, const
 	Vec3 HitNormal = (HitPoint - mpSphere->p).Norm();
 
 	Ray shadowRay(isect.HitPoint, wi);
-	double t; Intersection isection;
+	Intersection isection;
 	Vec3 f = isect.bsdf->f(isect.wo, wi);
-	if (!scene.Intersect(shadowRay, t, isection) || !isection.IsLight) L = Vec3(0.0, 0.0, 0.0);
+	if (!scene.Intersect(shadowRay, &isection) || !isection.IsLight) L = Vec3(0.0, 0.0, 0.0);
 	else L = throughput * f * std::abs(wi.Dot(isect.Normal)) * Emission() / PdfW;
 
 	if(sampled) {
@@ -91,8 +91,8 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 	pdfW = pdfA * dis2 / std::abs(lightPoint.Normal.Dot(-1 * wi));
 	Vec3 f = isect.bsdf->f(isect.wo, wi);
 	Ray shadowRay(isect.HitPoint, wi);
-	double t; Intersection isection;
-	scene.Intersect(shadowRay, t, isection);
+	Intersection isection;
+	scene.Intersect(shadowRay, &isection);
 	if (!isection.IsLight) {
 		return Vec3();
 	}

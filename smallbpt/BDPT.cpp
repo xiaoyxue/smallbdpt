@@ -52,9 +52,8 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 		PathVertex &prev = Path[bound - 1];
 		PathVertex &vertex = Path[bound];
 		Intersection &isect = Path[bound].isect;
-		double t;
-		int id;
-		if (!scene.Intersect(r, t, isect)) break;
+
+		if (!scene.Intersect(r, &isect)) break;
 
 		
 		Path[bound].mThroughput = throughput;

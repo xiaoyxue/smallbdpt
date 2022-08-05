@@ -94,33 +94,38 @@ Vec3 lightP3 = Vec3(-0.25f, 0.965f, 0.25f);
 //	new AreaLight(new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF))
 //};
 
-bool Scene::Intersect(const Ray &r, double &t, Intersection& isect) const {
+bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 	double d;
-	t = Inf;
+	double  t = Inf;
 	int id;
 	Shape* pShape = nullptr;
 	for (int i = 0; i < shapes.size(); ++i) {
-		if ((d = shapes[i]->IntersectP(r)) && d < t) { t = d; id = i; pShape = shapes[id]; }
+		if ((d = shapes[i]->IntersectP(r)) && d < t)
+		{
+			t = d;
+			id = i;
+			pShape = shapes[id];
+		}
 	}
 
 	if (t < Inf) {
-		isect.HitPoint = r.o + t * r.d;
-		isect.SurfaceNormal = shapes[id]->GetNormal(isect.HitPoint);
-		isect.Normal = isect.SurfaceNormal.Dot(r.d) < 0 ? isect.SurfaceNormal : -1 * isect.SurfaceNormal;
+		isect->HitPoint = r.o + t * r.d;
+		isect->SurfaceNormal = shapes[id]->GetNormal(isect->HitPoint);
+		isect->Normal = isect->SurfaceNormal.Dot(r.d) < 0 ? isect->SurfaceNormal : -1 * isect->SurfaceNormal;
 		if (pShape->ReflectType() == DIFF) {
-			isect.bsdf = std::make_shared<LambertianBSDF>(isect.Normal, isect.SurfaceNormal, pShape->Color());
+			isect->bsdf = std::make_shared<LambertianBSDF>(isect->Normal, isect->SurfaceNormal, pShape->Color());
 		}
 		else if (pShape->ReflectType() == SPEC) {
-			isect.bsdf = std::make_shared<SpecularReflection>(isect.Normal, isect.SurfaceNormal, pShape->Color());
+			isect->bsdf = std::make_shared<SpecularReflection>(isect->Normal, isect->SurfaceNormal, pShape->Color());
 		}
 		else if (pShape->ReflectType() == REFR) {
-			isect.bsdf = std::make_shared<SpecularTransmission>(isect.Normal, isect.SurfaceNormal, pShape->Color(), 1.0, 1.5);
+			isect->bsdf = std::make_shared<SpecularTransmission>(isect->Normal, isect->SurfaceNormal, pShape->Color(), 1.0, 1.5);
 		}
-		isect.wo = -1 * r.d;
-		isect.Delta = isect.bsdf->IsDelta();
-		isect.IsLight = (shapes[id]->Emission() != Vec3());
-		if (isect.IsLight) {
-			isect.pLight = shapes[id];
+		isect->wo = -1 * r.d;
+		isect->Delta = isect->bsdf->IsDelta();
+		isect->IsLight = (shapes[id]->Emission() != Vec3());
+		if (isect->IsLight) {
+			isect->pLight = shapes[id];
 		}
 	}
 	return t < Inf;

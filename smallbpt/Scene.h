@@ -13,7 +13,7 @@ public:
 	static std::vector<Shape*> shapes;
 	static std::vector<Light*> lights;
 
-	bool Intersect(const Ray& r, double& t, Intersection& isect) const;
+	bool Intersect(const Ray& r, Intersection* isect) const;
 	bool Intersect(const Ray& r) const;
 	Light* SampleOneLight(double* pdfLight, double u) const;
 };
