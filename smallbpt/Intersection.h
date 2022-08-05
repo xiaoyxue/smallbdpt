@@ -11,7 +11,7 @@ public:
 #ifdef _DEBUG
 	int id;
 #endif
-	Vec3 HitPoint;
+	Vec3 mPos;
 	Vec3 Normal;
 	Vec3 SurfaceNormal;
 	Vec3 wo;

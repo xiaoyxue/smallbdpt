@@ -109,8 +109,8 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 	}
 
 	if (t < Inf) {
-		isect->HitPoint = r.o + t * r.d;
-		isect->SurfaceNormal = shapes[id]->GetNormal(isect->HitPoint);
+		isect->mPos = r.o + t * r.d;
+		isect->SurfaceNormal = shapes[id]->GetNormal(isect->mPos);
 		isect->Normal = isect->SurfaceNormal.Dot(r.d) < 0 ? isect->SurfaceNormal : -1 * isect->SurfaceNormal;
 		if (pShape->ReflectType() == DIFF) {
 			isect->bsdf = std::make_shared<LambertianBSDF>(isect->Normal, isect->SurfaceNormal, pShape->Color());

@@ -24,13 +24,13 @@ public:
 	}
 
 	Vec3 Sample_Wi(const Intersection &isect, double *PdfW, Vec3 *wi) const {
-		*wi = (o - isect.HitPoint);
+		*wi = (o - isect.mPos);
 		double distance = wi->Length();
 		wi->Normalize();
 		double CosTheta = d.Dot(-1 * (*wi));
 		*PdfW = 1.0 * (distance * distance) / CosTheta;
 		//*PdfW = 1.0 * (dis / CosTheta) * (dis / CosTheta) / CosTheta;
-		return We(Ray(isect.HitPoint, -1 * (*wi)));
+		return We(Ray(isect.mPos, -1 * (*wi)));
 	}
 
 	double PdfPos() const {

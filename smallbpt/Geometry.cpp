@@ -9,7 +9,7 @@ Intersection Sphere::Sample(double* pdf, const Vec3& u) const
 	Vec3 scaledDir = rad * dir;
 	Vec3 point = p + scaledDir;
 	Intersection isect;
-	isect.HitPoint = point;
+	isect.mPos = point;
 	isect.Normal = (point - p).Norm();
 	isect.SurfaceNormal = isect.Normal;
 	return isect;
@@ -19,8 +19,8 @@ bool Sphere::Intersect(const Ray& r, Intersection* isect, double* t) const
 {
 	*t = intersect(r);
 	if (*t <= 0) return false;
-	isect->HitPoint = r.HitPoint(*t);
-	isect->SurfaceNormal = (isect->HitPoint - p).Norm();
+	isect->mPos = r.HitPoint(*t);
+	isect->SurfaceNormal = (isect->mPos - p).Norm();
 	isect->Normal = isect->SurfaceNormal.Dot(r.d) < 0 ? isect->SurfaceNormal : -1 * isect->SurfaceNormal;
 	return *t > r.tmin && *t < r.tmax;
 }
@@ -79,7 +79,7 @@ bool Triangle::Intersect(const Ray& ray, Intersection* isect, double* t) const {
 		return false;
 
 	*t = tHit;
-	isect->HitPoint = (1 - b1 - b2) * p0 + b1 * p1 + b2 * p2;
+	isect->mPos = (1 - b1 - b2) * p0 + b1 * p1 + b2 * p2;
 	isect->SurfaceNormal = normal;
 	isect->Normal = isect->SurfaceNormal.Dot(ray.d) < 0 ? isect->SurfaceNormal : -1 * isect->SurfaceNormal;
 	isect->b1 = b1;
@@ -161,7 +161,7 @@ Intersection Triangle::Sample(double* pdf, const Vec3& u) const
 {
 	Vec3 b = UniformSampleTriangle(u);
 	Intersection isect;
-	isect.HitPoint = b[0] * p0 + b[1] * p1 + (1 - b[0] - b[1]) * p2;
+	isect.mPos = b[0] * p0 + b[1] * p1 + (1 - b[0] - b[1]) * p2;
 	isect.Normal = normal;
 	isect.SurfaceNormal = normal;
 	*pdf = 1 / Area();
