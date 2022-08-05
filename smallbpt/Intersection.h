@@ -15,14 +15,14 @@ public:
 	Vec3 mNormal;
 	Vec3 mSurfaceNormal;
 	Vec3 wo;
-	bool Delta;
+	bool mIsDelta;
 	bool IsLight;
 	Shape* pLight;
 	double b1, b2;
 	std::shared_ptr<BSDF> bsdf;
 	Intersection() {
 		IsLight = false;
-		Delta = false;
+		mIsDelta = false;
 	}
 };
 

@@ -7,7 +7,7 @@
 Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, Sampler& sampler)
 {
 	Vec3 L(0, 0, 0);
-	if (!hitPoint.Delta) {
+	if (!hitPoint.mIsDelta) {
 		Light* pLight;
 		double pdfLight;
 		double pdfA, pdfW;

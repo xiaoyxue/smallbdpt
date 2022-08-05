@@ -122,7 +122,7 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 			isect->bsdf = std::make_shared<SpecularTransmission>(isect->mNormal, isect->mSurfaceNormal, pShape->Color(), 1.0, 1.5);
 		}
 		isect->wo = -1 * r.d;
-		isect->Delta = isect->bsdf->IsDelta();
+		isect->mIsDelta = isect->bsdf->IsDelta();
 		isect->IsLight = (shapes[id]->Emission() != Vec3());
 		if (isect->IsLight) {
 			isect->pLight = shapes[id];
