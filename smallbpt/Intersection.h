@@ -19,7 +19,7 @@ public:
 	bool IsLight;
 	Shape* pLight;
 	double b1, b2;
-	std::shared_ptr<BSDF> bsdf;
+	std::shared_ptr<BSDF> mpBSDF;
 	Intersection() {
 		IsLight = false;
 		mIsDelta = false;

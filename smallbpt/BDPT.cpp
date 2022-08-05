@@ -62,11 +62,11 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 		if (bound >= maxDepth + 1) break;
 
 		Vec3 wo;
-		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &pdfW, sampler.Get3D());
+		Vec3 f = isect.mpBSDF->Sample_f(-1 * r.d, &wo, &pdfW, sampler.Get3D());
 		wo.Normalize();
 		throughput = throughput * f * (std::abs(wo.Dot(isect.mNormal))) / pdfW;
 
-		double pdfWPrev = isect.bsdf->Pdf(wo, -1 * r.d);
+		double pdfWPrev = isect.mpBSDF->Pdf(wo, -1 * r.d);
 		prev.mPdfPrev = ConvertSolidToArea(pdfWPrev, vertex, prev);
 		
 		if (isect.mIsDelta) {
@@ -144,7 +144,7 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 			else {
 				Vec3 wo = (lightVertexMinus->mIsect.mPos - lightVertex->mIsect.mPos).Norm();
 				Vec3 wi = (cameraVertex->mIsect.mPos - lightVertex->mIsect.mPos).Norm();
-				pdfW = lightVertex->mIsect.bsdf->Pdf(wo, wi);
+				pdfW = lightVertex->mIsect.mpBSDF->Pdf(wo, wi);
 				pdfA = ConvertSolidToArea(pdfW, *lightVertex, *cameraVertex);
 			}
 			a4 = { &cameraVertex->mPdfPrev, pdfA };
@@ -166,7 +166,7 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 		if (s > 0) {
 			Vec3 wo = (lightVertex->mIsect.mPos - cameraVertex->mIsect.mPos).Norm();
 			Vec3 wi = (cameraVertexMinus->mIsect.mPos - cameraVertex->mIsect.mPos).Norm();
-			double pdfW = cameraVertex->mIsect.bsdf->Pdf(wo, wi);
+			double pdfW = cameraVertex->mIsect.mpBSDF->Pdf(wo, wi);
 			double pdfA = ConvertSolidToArea(pdfW, *cameraVertex, *cameraVertexMinus);
 			a5 = { &cameraVertexMinus->mPdfPrev, pdfA };
 		}
@@ -200,7 +200,7 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 		else {
 			Vec3 wo = (cameraVertexMinus->mIsect.mPos - cameraVertex->mIsect.mPos).Norm();
 			Vec3 wi = (lightVertex->mIsect.mPos - cameraVertex->mIsect.mPos).Norm();
-			pdfW = cameraVertex->mIsect.bsdf->Pdf(wo, wi);
+			pdfW = cameraVertex->mIsect.mpBSDF->Pdf(wo, wi);
 			pdfA = ConvertSolidToArea(pdfW, *cameraVertex, *lightVertex);
 		}
 		a6 = { &lightVertex->mPdfPrev, pdfA };
@@ -210,7 +210,7 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 	if (lightVertexMinus) {
 		Vec3 wo = (cameraVertex->mIsect.mPos - lightVertex->mIsect.mPos).Norm();
 		Vec3 wi = (lightVertexMinus->mIsect.mPos - lightVertex->mIsect.mPos).Norm();
-		double pdfW = lightVertex->mIsect.bsdf->Pdf(wo, wi);
+		double pdfW = lightVertex->mIsect.mpBSDF->Pdf(wo, wi);
 		double pdfA = ConvertSolidToArea(pdfW, *lightVertex, *lightVertexMinus);
 		a7 = { &lightVertexMinus->mPdfPrev, pdfA };
 	}
@@ -265,7 +265,7 @@ double Path_Pdf(const Scene &scene, Sampler &sampler, const std::vector<PathVert
 			else {
 				Vec3 wo = (path[i - 2].mIsect.mPos - path[i - 1].mIsect.mPos).Norm();
 				Vec3 wi = (path[i].mIsect.mPos - path[i - 1].mIsect.mPos).Norm();
-				double pdfW = path[i - 1].mIsect.bsdf->Pdf(wo, wi);
+				double pdfW = path[i - 1].mIsect.mpBSDF->Pdf(wo, wi);
 				double pdfA = ConvertSolidToArea(pdfW, path[i - 1], path[i]);
 				p *= pdfA;
 			}
@@ -290,7 +290,7 @@ double Path_Pdf(const Scene &scene, Sampler &sampler, const std::vector<PathVert
 			else {
 				Vec3 wo = (path[j + 2].mIsect.mPos - path[j + 1].mIsect.mPos).Norm();
 				Vec3 wi = (path[j].mIsect.mPos - path[j + 1].mIsect.mPos).Norm();
-				double pdfW = path[j + 1].mIsect.bsdf->Pdf(wo, wi);
+				double pdfW = path[j + 1].mIsect.mpBSDF->Pdf(wo, wi);
 				double pdfA = ConvertSolidToArea(pdfW, path[j + 1], path[j]);
 				p *= pdfA;
 			}
@@ -375,7 +375,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 				double pdfW;
 				Vec3 wi;
 				Vec3 We = camera.Sample_Wi(lightVertex.mIsect, &pdfW, &wi);
-				Vec3 f = lightVertex.mIsect.bsdf->f(lightVertex.mIsect.wo, wi);
+				Vec3 f = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.wo, wi);
 				sampled.mIsect.mPos = camera.o;
 				sampled.mIsect.mNormal = camera.d;
 				sampled.mThroughput = We / pdfW;
@@ -442,8 +442,8 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 		{
 			Vec3 cameraTolight = lightVertex.mIsect.mPos - cameraVertex.mIsect.mPos;
 			cameraTolight.Norm();
-			Vec3 fsE = cameraVertex.mIsect.bsdf->f(cameraVertex.mIsect.wo, cameraTolight);
-			Vec3 fsL = lightVertex.mIsect.bsdf->f(lightVertex.mIsect.wo, -1 * cameraTolight);
+			Vec3 fsE = cameraVertex.mIsect.mpBSDF->f(cameraVertex.mIsect.wo, cameraTolight);
+			Vec3 fsL = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.wo, -1 * cameraTolight);
 			double GeometryTerm = G(lightVertex, cameraVertex);
 			L = cameraVertex.mThroughput * fsE * GeometryTerm * fsL * lightVertex.mThroughput;
 		}

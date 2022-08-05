@@ -113,16 +113,16 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 		isect->mSurfaceNormal = shapes[id]->GetNormal(isect->mPos);
 		isect->mNormal = isect->mSurfaceNormal.Dot(r.d) < 0 ? isect->mSurfaceNormal : -1 * isect->mSurfaceNormal;
 		if (pShape->ReflectType() == DIFF) {
-			isect->bsdf = std::make_shared<LambertianBSDF>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
+			isect->mpBSDF = std::make_shared<LambertianBSDF>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
 		}
 		else if (pShape->ReflectType() == SPEC) {
-			isect->bsdf = std::make_shared<SpecularReflection>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
+			isect->mpBSDF = std::make_shared<SpecularReflection>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
 		}
 		else if (pShape->ReflectType() == REFR) {
-			isect->bsdf = std::make_shared<SpecularTransmission>(isect->mNormal, isect->mSurfaceNormal, pShape->Color(), 1.0, 1.5);
+			isect->mpBSDF = std::make_shared<SpecularTransmission>(isect->mNormal, isect->mSurfaceNormal, pShape->Color(), 1.0, 1.5);
 		}
 		isect->wo = -1 * r.d;
-		isect->mIsDelta = isect->bsdf->IsDelta();
+		isect->mIsDelta = isect->mpBSDF->IsDelta();
 		isect->IsLight = (shapes[id]->Emission() != Vec3());
 		if (isect->IsLight) {
 			isect->pLight = shapes[id];
