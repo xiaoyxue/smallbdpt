@@ -37,7 +37,6 @@ public:
 
 	virtual bool Intersect(const Ray& r, Intersection* isect, double* t) const = 0;
 	virtual bool Intersect(const Ray& r) const = 0;
-	virtual double IntersectP(const Ray& r) const = 0;
 
 
 };
@@ -79,7 +78,6 @@ public:
 
 	bool Intersect(const Ray& r) const override;
 
-	double IntersectP(const Ray& r) const override;
 private:
 	double intersect(const Ray& r) const;
 };
@@ -98,8 +96,6 @@ public:
 
 
 	bool Intersect(const Ray& ray) const override;
-
-	double IntersectP(const Ray& ray) const override;
 
 	double Area() const override {
 		return e1.Cross(e2).Length() * 0.5;

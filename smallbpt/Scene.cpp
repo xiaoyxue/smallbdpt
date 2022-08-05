@@ -95,22 +95,23 @@ Vec3 lightP3 = Vec3(-0.25f, 0.965f, 0.25f);
 //};
 
 bool Scene::Intersect(const Ray &r, Intersection* isect) const {
-	double d;
-	double  t = Inf;
-	int id;
+
+	double t = Inf;
 	Shape* pShape = nullptr;
-	for (int i = 0; i < shapes.size(); ++i) {
-		if ((d = shapes[i]->IntersectP(r)) && d < t)
-		{
-			t = d;
-			id = i;
-			pShape = shapes[id];
+	for (int i = 0; i < shapes.size(); i++) {
+		Intersection isection;
+		double tt;
+		shapes[i]->Intersect(r, &isection, &tt);
+		if (tt > 0  && t > tt) {
+			t = tt;
+			*isect = isection;
+			pShape = shapes[i];
 		}
 	}
 
 	if (t < Inf) {
 		isect->mPos = r.o + t * r.d;
-		isect->mSurfaceNormal = shapes[id]->GetNormal(isect->mPos);
+		isect->mSurfaceNormal = pShape->GetNormal(isect->mPos);
 		isect->mNormal = isect->mSurfaceNormal.Dot(r.d) < 0 ? isect->mSurfaceNormal : -1 * isect->mSurfaceNormal;
 		if (pShape->ReflectType() == DIFF) {
 			isect->mpBSDF = std::make_shared<LambertianBSDF>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
@@ -123,23 +124,25 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 		}
 		isect->mOutDir = -1 * r.d;
 		isect->mIsDelta = isect->mpBSDF->IsDelta();
-		isect->IsLight = (shapes[id]->Emission() != Vec3());
+		isect->IsLight = (pShape->Emission() != Vec3());
 		if (isect->IsLight) {
-			isect->pLight = shapes[id];
+			isect->pLight = pShape;
 		}
 	}
 	return t < Inf;
 }
 
 bool Scene::Intersect(const Ray& r) const {
-	double d, inf = 1e20, tmax = r.tmax, tmin = r.tmin, t = r.tmax;
-	for (int i = 0; i < shapes.size(); ++i) {
-		if ((d = shapes[i]->IntersectP(r)) && d < t && d > tmin)
-		{
-			t = d;
+	double t = Inf;
+	for (int i = 0; i < shapes.size(); i++) {
+		Intersection isection;
+		double tt;
+		shapes[i]->Intersect(r, &isection, &tt);
+		if (tt > 0 && t > tt) {
+			t = tt;
 		}
 	}
-	return t < r.tmax&& t > r.tmin;
+	return t > r.tmin && t < r.tmax;
 }
 
 Light* Scene::SampleOneLight(double* pdfLight, double u) const

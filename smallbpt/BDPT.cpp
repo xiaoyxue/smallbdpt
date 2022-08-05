@@ -378,7 +378,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 				Vec3 f = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.mOutDir, wi);
 				sampled.mIsect.mPos = camera.o;
 				sampled.mIsect.mNormal = camera.d;
-				sampled.mThroughput = We / pdfW;
+				//sampled.mThroughput = We / pdfW;
 				sampled.mPdfFwd = camera.PdfPos();
 				L = We * lightVertex.mThroughput * f * wi.Dot(lightVertex.mIsect.mNormal) / pdfW;
 			}
@@ -421,7 +421,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			Light* pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
 			L = pLight->DirectIllumination(scene, sampler, cameraVertex.mIsect, cameraVertex.mThroughput, &sampledVertex) / pdfLight;
 
-			sampled.mThroughput = sampledVertex.mThroughput / pdfLight;
+			//sampled.mThroughput = sampledVertex.mThroughput / pdfLight;
 			sampled.mPdfFwd = lightPath[0].mPdfFwd;
 			sampled.mIsect.mPos = sampledVertex.mIsect.mPos;
 			sampled.mIsect.mNormal = sampledVertex.mIsect.mNormal;
@@ -450,9 +450,6 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 	}
 	double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(scene, sampler, lightPath, cameraPath, s, t, sampled));
 	//double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(scene, sampler, lightPath, cameraPath, s, t, sampled));
-	//if (std::abs(MIS2 - MIS) > 0.1) {
-	//	std::cout << "MIS error " << "MIS: " << MIS << " MIS2: " << MIS2 << std::endl;
-	//}
 	//std::cout << "MIS: " << MIS << " MIS2: " << MIS2 << std::endl;
 	L = MIS * L;
 	if (MISRecord) *MISRecord = MIS;
@@ -492,19 +489,8 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 		for (int x = 0; x < resX; ++x) {
 			Vec3 L(0, 0, 0);
 			for (int spp = 0; spp < mSpp; ++spp) {
-				double u = mpSampler->Get1D() - 0.5f;
-				double v = mpSampler->Get1D() - 0.5f;
-				double imageX = x + 0.5f + u;
-				double imageY = y + 0.5f + v;
-				double alpha = imageX / (double)(film->resX);
-				double beta = imageY / (double)(film->resY);
-				Vec3 p0 = film->LU + alpha * (film->RU - film->LU);
-				Vec3 p1 = film->LL + alpha * (film->RL - film->LL);
-				Vec3 p = p0 + beta * (p1 - p0);
-				Vec3 d = (p - camera.o).Norm();
 
-
-				Ray cameraRay(camera.o, d);
+				Ray cameraRay = camera.GenerateRay(x, y, mpSampler->Get2D(), 0);
 				int nLightVertex = GenerateLightPath(scene, *mpSampler, lightPath, mMaxDepth + 1);
 				int nCameraVertex = GenerateCameraPath(scene, camera, *mpSampler, cameraPath, cameraRay, mMaxDepth + 2);
 
