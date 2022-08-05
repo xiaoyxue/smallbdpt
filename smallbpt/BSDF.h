@@ -13,7 +13,7 @@ inline double CosTheta(const Vec3 &wo) {
 }
 
 inline bool Refract(const Vec3 &wi, const Vec3 &normal, double eta, Vec3 *wt) {
-	double cosThetaI = wi.dot(normal);
+	double cosThetaI = wi.Dot(normal);
 	double sin2ThetaI = std::max(double(0), double(1 - cosThetaI * cosThetaI));
 	double sin2ThetaT = eta * eta * sin2ThetaI;
 
@@ -42,7 +42,7 @@ public:
 	}
 
 	Vec3 WorldToLocal(const Vec3 &v) const {
-		return Vec3(v.dot(ss), v.dot(ts), v.dot(ns));
+		return Vec3(v.Dot(ss), v.Dot(ts), v.Dot(ns));
 	}
 
 	Vec3 ss, ts, ns, surfaceNormal;
@@ -130,7 +130,7 @@ public:
 		Vec3 wiLocal(-1 * woLocal.x, -1 * woLocal.y, woLocal.z);
 		*wi = this->LocalToWorld(wiLocal);
 		*pdf = 1.0;
-		return R / wi->dot(ns);
+		return R / wi->Dot(ns);
 	}
 	bool IsDelta() { return true; }
 	double Pdf(const Vec3 &wo, const Vec3 &wi) const { return 0.0; }
@@ -149,7 +149,7 @@ public:
 	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		double cosTheta = CosTheta(woLocal);
-		double entering = ns.dot(surfaceNormal) > 0;
+		double entering = ns.Dot(surfaceNormal) > 0;
 		double etaI = entering ? eta0 : eta1;
 		double etaT = entering ? eta1 : eta0;
 		double fresnelreflect = fresnel.FrDielectric(cosTheta, etaI, etaT);
@@ -166,7 +166,7 @@ public:
 		else {
 			Vec3 wiLocal;
 			Vec3 n(0, 0, 1);
-			n = n.dot(woLocal) < 0 ? -1 * n : n;
+			n = n.Dot(woLocal) < 0 ? -1 * n : n;
 			if (!Refract(woLocal, n, etaI / etaT, &wiLocal)) {
 				//std::cout << "internel reflection" << std::endl;
 				/*

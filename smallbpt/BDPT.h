@@ -23,7 +23,6 @@ private:
 
 	int mSpp, mMaxDepth;
 	Sampler *mpSampler;
-	//std::vector<PathVertex> LightPath;
 };
 
 int GenerateLightPath(
@@ -77,6 +76,8 @@ bool IsConnectable(
 	const Vec3					&pointB);
 
 double MISWeight(
+	const Scene					&scene,
+	Sampler						&sampler,
 	std::vector<PathVertex>		&lightPath, 
 	std::vector<PathVertex>		&cameraPath,
 	int							s, 
@@ -84,6 +85,8 @@ double MISWeight(
 	PathVertex					&sampled);
 
 double MISWeight2(
+	const Scene					&scene,
+	Sampler						&sampler,
 	std::vector<PathVertex>		&lightPath, 
 	std::vector<PathVertex>		&cameraPath,
 	int							s, 
@@ -91,7 +94,9 @@ double MISWeight2(
 	PathVertex					&sampled);
 
 double Path_Pdf(
-	const std::vector<PathVertex> &path, 
-	int							  s, 
-	int							  t);
+	const Scene						&scene,
+	Sampler							&sampler,
+	const std::vector<PathVertex>	&path, 
+	int								s, 
+	int								t);
 #endif

@@ -5,15 +5,15 @@
 Vec3 UniformSampleDisk(const Vec3& u) {
 	double r = std::sqrt(u[0]);
 	double theta = 2 * PI * u[1];
-	return Vec3(r * std::cos(theta), r * std::sin(theta));
+	return Vec3(r * std::cos(theta), r * std::sin(theta), 0);
 }
 
 Vec3 ConcentricSampleDisk(const Vec3& u) {
 	// Map uniform random numbers to $[-1,1]^2$
-	Vec3 uOffset = 2.f * u - Vec3(1, 1);
+	Vec3 uOffset = 2.f * u - Vec3(1, 1, 0);
 
 	// Handle degeneracy at the origin
-	if (uOffset.x == 0 && uOffset.y == 0) return Vec3(0, 0);
+	if (uOffset.x == 0 && uOffset.y == 0) return Vec3(0, 0, 0);
 
 	// Apply concentric mapping to point
 	double theta, r;
@@ -25,7 +25,7 @@ Vec3 ConcentricSampleDisk(const Vec3& u) {
 		r = uOffset.y;
 		theta = PI_Over2 - PI_Over4 * (uOffset.x / uOffset.y);
 	}
-	return r * Vec3(std::cos(theta), std::sin(theta));
+	return r * Vec3(std::cos(theta), std::sin(theta), 0);
 }
 
 Vec3 UniformSampleHemisphere(const Vec3& u) {

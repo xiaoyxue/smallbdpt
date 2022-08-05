@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
-#include "Smallbpt.h"
+
 
 struct Vec2 {
 	double x, y;
@@ -51,7 +51,7 @@ struct Vec2 {
 		return false;
 	}
 
-	inline double dot(const Vec2& b) const {
+	inline double Dot(const Vec2& b) const {
 		return x * b.x + y * b.y;
 	}
 
@@ -119,7 +119,7 @@ struct Vec3 {
 		return false;
 	}
 
-	inline double dot(const Vec3& b) const {
+	inline double Dot(const Vec3& b) const {
 		return x * b.x + y * b.y + z * b.z;
 	}
 
@@ -127,7 +127,7 @@ struct Vec3 {
 		return Vec3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
 	}
 
-	inline Vec3 cross(const Vec3& b) const {
+	inline Vec3 Cross(const Vec3& b) const {
 		return Vec3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
 	}
 
@@ -144,11 +144,15 @@ struct Vec3 {
 	inline Vec3 mult(const Vec3& b) const {
 		return Vec3(x * b.x, y * b.y, z * b.z);
 	}
-	double length() const {
+	double Length() const {
 		return std::sqrt(x * x + y * y + z * z);
 	}
-	inline Vec3 norm() {
-		return *this = (*this) / length();
+	inline Vec3 Norm() {
+		return *this = (*this) / Length();
+	}
+
+	inline void Normalize() {
+		*this = *this / this->Length();
 	}
 
 	inline double maxComponentValue() const {
@@ -166,11 +170,11 @@ struct Vec3 {
 	}
 };
 
-inline double dot(const Vec3& a, const Vec3& b) {
+inline double Dot(const Vec3& a, const Vec3& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline Vec3 cross(const Vec3& a, const Vec3& b) {
+inline Vec3 Cross(const Vec3& a, const Vec3& b) {
 	return Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
@@ -183,5 +187,5 @@ inline Vec3 operator*(double a, const Vec3& b) {
 }
 
 inline void Normalize(Vec3& a) {
-	a = a / a.length();
+	a = a / a.Length();
 }

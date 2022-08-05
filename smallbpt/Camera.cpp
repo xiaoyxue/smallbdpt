@@ -33,11 +33,11 @@ void Camera::Init() {
 	std::cout << "RL: " << film->RL.x << ", " << film->RL.y << ", " << film->RL.z << std::endl;
 
 
-	film->Area = (film->LL - film->LU).length() * (film->RU - film->LU).length();
+	film->Area = (film->LL - film->LU).Length() * (film->RU - film->LU).Length();
 }
 
 int Camera::GenerateCameraRay(const CameraSample &sample, Ray &ray) {
-	Vec3 dir = (sample.filmPoint - o).norm();
+	Vec3 dir = (sample.filmPoint - o).Norm();
 	ray.o = o;
 	ray.d = dir;
 	return 1;

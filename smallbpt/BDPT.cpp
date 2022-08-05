@@ -64,8 +64,8 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 
 		Vec3 wo;
 		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &PdfW, sampler.Get3D());
-		wo.norm();
-		throughput = throughput * f * (std::abs(wo.dot(isect.Normal))) / PdfW;
+		wo.Normalize();
+		throughput = throughput * f * (std::abs(wo.Dot(isect.Normal))) / PdfW;
 
 		double PdfWPrev = isect.bsdf->Pdf(wo, -1 * r.d);
 		prev.mPdfPrev = ConvertSolidToArea(PdfWPrev, vertex, prev);
@@ -83,18 +83,18 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 
 double ConvertSolidToArea(double pdfW, const PathVertex &vertex, const PathVertex &nextVertex) {
 	Vec3 dir = nextVertex.isect.HitPoint - vertex.isect.HitPoint;
-	double dist = dir.length();
+	double dist = dir.Length();
 	double dist2 = dist * dist;
 	if (dist2 == 0) return 0;
-	dir.norm();
-	double cosTheta = std::abs(dir.dot(nextVertex.isect.Normal));
+	dir.Normalize();
+	double cosTheta = std::abs(dir.Dot(nextVertex.isect.Normal));
 	return pdfW * cosTheta / dist2;
 }
 
 bool IsConnectable(const Scene& scene, const Vec3& pointA, const Vec3& pointB) {
 	Vec3 dir = pointA - pointB;
-	double dist = dir.length();
-	Ray ray(pointB, dir.norm(), 0.0, dist - eps);  //Be careful ! Float error will cause the incorrect intersection
+	double dist = dir.Length();
+	Ray ray(pointB, dir.Norm(), 0.0, dist - eps);  //Be careful ! Float error will cause the incorrect intersection
 	
 	if (scene.Intersect(ray)) return false;
 	return true;
@@ -102,16 +102,16 @@ bool IsConnectable(const Scene& scene, const Vec3& pointA, const Vec3& pointB) {
 
 double G(const PathVertex &vertexA, const PathVertex &vertexB) {
 	Vec3 dirAtoB = vertexB.isect.HitPoint - vertexA.isect.HitPoint;
-	double dist = dirAtoB.length();
-	dirAtoB.norm();
-	double cosThetaA = std::abs(dirAtoB.dot(vertexA.isect.Normal));
-	double cosThetaB = std::abs(dirAtoB.dot(vertexB.isect.Normal));
+	double dist = dirAtoB.Length();
+	dirAtoB.Normalize();
+	double cosThetaA = std::abs(dirAtoB.Dot(vertexA.isect.Normal));
+	double cosThetaB = std::abs(dirAtoB.Dot(vertexB.isect.Normal));
 	double g = cosThetaA * cosThetaB / dist / dist;
 	return g;
 }
 
 
-double MISWeight(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& cameraPath,
+double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& lightPath, std::vector<PathVertex>& cameraPath,
 	int s, int t, PathVertex& sampled) {
 	if (s + t == 2) return 1;
 
@@ -137,47 +137,50 @@ double MISWeight(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& ca
 			double pdfW, pdfA;
 			if (lightVertexMinus == nullptr) {
 				Vec3 lightToHitPoint = cameraVertex->isect.HitPoint - lightVertex->isect.HitPoint;
-				lightToHitPoint.norm();
-				double CosTheta = lightVertex->isect.Normal.dot(lightToHitPoint);
+				lightToHitPoint.Norm();
+				double CosTheta = lightVertex->isect.Normal.Dot(lightToHitPoint);
 				pdfW = CosineHemispherePdf(CosTheta);
 				pdfA = ConvertSolidToArea(pdfW, *lightVertex, *cameraVertex);
 			}
 			else {
-				Vec3 wo = (lightVertexMinus->isect.HitPoint - lightVertex->isect.HitPoint).norm();
-				Vec3 wi = (cameraVertex->isect.HitPoint - lightVertex->isect.HitPoint).norm();
+				Vec3 wo = (lightVertexMinus->isect.HitPoint - lightVertex->isect.HitPoint).Norm();
+				Vec3 wi = (cameraVertex->isect.HitPoint - lightVertex->isect.HitPoint).Norm();
 				pdfW = lightVertex->isect.bsdf->Pdf(wo, wi);
 				pdfA = ConvertSolidToArea(pdfW, *lightVertex, *cameraVertex);
 			}
 			a4 = { &cameraVertex->mPdfPrev, pdfA };
 		}
 		else {
-			const Sphere& light = Scene::spheres[Scene::numSpheres - 1];
-			double r = light.rad;
-			double area = 4 * PI * r * r;
-			double pdfPos = 1.0 / area;
-			a4 = { &cameraVertex->mPdfPrev, pdfPos };
+			//const Sphere& light = Scene::spheres[Scene::numSpheres - 1];
+			//double r = light.rad;
+			//double area = 4 * PI * r * r;
+			//double pdfPos = 1.0 / area;
+			double pdfLight;
+			Light* pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
+			double pdfPos = 1.0 / pLight->GetShape()->Area();
+			a4 = { &cameraVertex->mPdfPrev, pdfPos * pdfLight };
 		}
 	}
 
 	ScopedAssignment<double> a5;
 	if (cameraVertexMinus) {
 		if (s > 0) {
-			Vec3 wo = (lightVertex->isect.HitPoint - cameraVertex->isect.HitPoint).norm();
-			Vec3 wi = (cameraVertexMinus->isect.HitPoint - cameraVertex->isect.HitPoint).norm();
+			Vec3 wo = (lightVertex->isect.HitPoint - cameraVertex->isect.HitPoint).Norm();
+			Vec3 wi = (cameraVertexMinus->isect.HitPoint - cameraVertex->isect.HitPoint).Norm();
 			double pdfW = cameraVertex->isect.bsdf->Pdf(wo, wi);
 			double pdfA = ConvertSolidToArea(pdfW, *cameraVertex, *cameraVertexMinus);
 			a5 = { &cameraVertexMinus->mPdfPrev, pdfA };
 		}
 		else {
-			const Sphere& light = Scene::spheres[Scene::numSpheres - 1];
+			//const Sphere& light = Scene::spheres[Scene::numSpheres - 1];
 			Vec3 hitPointToLight = cameraVertex->isect.HitPoint - cameraVertexMinus->isect.HitPoint;
-			double dist = hitPointToLight.length();
-			hitPointToLight.norm();
+			double dist = hitPointToLight.Length();
+			hitPointToLight.Normalize();
 			Vec3 lightToHitPoint = -1 * hitPointToLight;
 			Vec3 lightNormal = cameraVertex->isect.Normal;
-			double CosThetaLight = std::abs(lightNormal.dot(lightToHitPoint));
+			double CosThetaLight = std::abs(lightNormal.Dot(lightToHitPoint));
 			double pdfW = CosineHemispherePdf(CosThetaLight);
-			double pdfA = pdfW * (std::abs(cameraVertexMinus->isect.Normal.dot(hitPointToLight))) / dist / dist;
+			double pdfA = pdfW * (std::abs(cameraVertexMinus->isect.Normal.Dot(hitPointToLight))) / dist / dist;
 			a5 = { &cameraVertexMinus->mPdfPrev, pdfA };
 		}
 
@@ -189,15 +192,15 @@ double MISWeight(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& ca
 		double pdfW, pdfA;
 		if (cameraVertexMinus == nullptr) {
 			Vec3 cameraToHitPoint = lightVertex->isect.HitPoint - cameraVertex->isect.HitPoint;
-			cameraToHitPoint.norm();
-			double cosTheta = std::abs(cameraVertex->isect.Normal.dot(cameraToHitPoint));
+			cameraToHitPoint.Normalize();
+			double cosTheta = std::abs(cameraVertex->isect.Normal.Dot(cameraToHitPoint));
 			Ray ray(cameraVertex->isect.HitPoint, cameraToHitPoint);
 			pdfW = cameraVertex->mpCamera->PdfDir(ray);
 			pdfA = ConvertSolidToArea(pdfW, *cameraVertex, *lightVertex);
 		}
 		else {
-			Vec3 wo = (cameraVertexMinus->isect.HitPoint - cameraVertex->isect.HitPoint).norm();
-			Vec3 wi = (lightVertex->isect.HitPoint - cameraVertex->isect.HitPoint).norm();
+			Vec3 wo = (cameraVertexMinus->isect.HitPoint - cameraVertex->isect.HitPoint).Norm();
+			Vec3 wi = (lightVertex->isect.HitPoint - cameraVertex->isect.HitPoint).Norm();
 			pdfW = cameraVertex->isect.bsdf->Pdf(wo, wi);
 			pdfA = ConvertSolidToArea(pdfW, *cameraVertex, *lightVertex);
 		}
@@ -206,8 +209,8 @@ double MISWeight(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& ca
 
 	ScopedAssignment<double> a7;
 	if (lightVertexMinus) {
-		Vec3 wo = (cameraVertex->isect.HitPoint - lightVertex->isect.HitPoint).norm();
-		Vec3 wi = (lightVertexMinus->isect.HitPoint - lightVertex->isect.HitPoint).norm();
+		Vec3 wo = (cameraVertex->isect.HitPoint - lightVertex->isect.HitPoint).Norm();
+		Vec3 wi = (lightVertexMinus->isect.HitPoint - lightVertex->isect.HitPoint).Norm();
 		double pdfW = lightVertex->isect.bsdf->Pdf(wo, wi);
 		double pdfA = ConvertSolidToArea(pdfW, *lightVertex, *lightVertexMinus);
 		a7 = { &lightVertexMinus->mPdfPrev, pdfA };
@@ -238,18 +241,22 @@ double MISWeight(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& ca
 	return 1 / (1 + sumRi);
 }
 
-double Path_Pdf(const std::vector<PathVertex>& path, int s, int t) {
+double Path_Pdf(const Scene &scene, Sampler &sampler, const std::vector<PathVertex>& path, int s, int t) {
 	double p = 1.0;
 	for (int i = 0; i < s; ++i) {
 		if (i == 0) {
-			double pdfA = path[0].mPdfFwd;
+			//double pdfA = path[0].mPdfFwd;
 			//const Sphere& light = Scene::spheres[Scene::numSpheres - 1];
 			//double pdfA = 1.0 / (4 * PI * light.rad * light.rad);
-			//p *= pdfA;
+			double pdfLight;
+			Light* pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
+			Shape* pShape = pLight->GetShape();
+			double pdfA = 1.0 / pShape->Area();
+			p *= pdfA * pdfLight;
 		}
 		else if (i == 1) {
-			Vec3 lightToHitPoint = (path[1].isect.HitPoint - path[0].isect.HitPoint).norm();
-			double cosThetaLight = std::abs(path[0].isect.Normal.dot(lightToHitPoint));
+			Vec3 lightToHitPoint = (path[1].isect.HitPoint - path[0].isect.HitPoint).Norm();
+			double cosThetaLight = std::abs(path[0].isect.Normal.Dot(lightToHitPoint));
 			double pdfW = CosineHemispherePdf(cosThetaLight);
 			double pdfA = ConvertSolidToArea(pdfW, path[0], path[1]);
 			p *= pdfA;
@@ -257,8 +264,8 @@ double Path_Pdf(const std::vector<PathVertex>& path, int s, int t) {
 		else {
 			if (path[i - 1].isect.Delta) p *= 1.0;
 			else {
-				Vec3 wo = (path[i - 2].isect.HitPoint - path[i - 1].isect.HitPoint).norm();
-				Vec3 wi = (path[i].isect.HitPoint - path[i - 1].isect.HitPoint).norm();
+				Vec3 wo = (path[i - 2].isect.HitPoint - path[i - 1].isect.HitPoint).Norm();
+				Vec3 wi = (path[i].isect.HitPoint - path[i - 1].isect.HitPoint).Norm();
 				double pdfW = path[i - 1].isect.bsdf->Pdf(wo, wi);
 				double pdfA = ConvertSolidToArea(pdfW, path[i - 1], path[i]);
 				p *= pdfA;
@@ -273,7 +280,7 @@ double Path_Pdf(const std::vector<PathVertex>& path, int s, int t) {
 			p *= path[j].mpCamera->PdfPos();
 		}
 		else if (i == 1) {
-			Vec3 CameraToHitPoint = (path[j].isect.HitPoint - path[j + 1].isect.HitPoint).norm();
+			Vec3 CameraToHitPoint = (path[j].isect.HitPoint - path[j + 1].isect.HitPoint).Norm();
 			Ray cameraRay(path[j + 1].isect.HitPoint, CameraToHitPoint);
 			double pdfW = path[j + 1].mpCamera->PdfDir(cameraRay);
 			double pdfA = ConvertSolidToArea(pdfW, path[j + 1], path[j]);
@@ -282,8 +289,8 @@ double Path_Pdf(const std::vector<PathVertex>& path, int s, int t) {
 		else {
 			if (path[j + 1].isect.Delta) p *= 1.0;
 			else {
-				Vec3 wo = (path[j + 2].isect.HitPoint - path[j + 1].isect.HitPoint).norm();
-				Vec3 wi = (path[j].isect.HitPoint - path[j + 1].isect.HitPoint).norm();
+				Vec3 wo = (path[j + 2].isect.HitPoint - path[j + 1].isect.HitPoint).Norm();
+				Vec3 wi = (path[j].isect.HitPoint - path[j + 1].isect.HitPoint).Norm();
 				double pdfW = path[j + 1].isect.bsdf->Pdf(wo, wi);
 				double pdfA = ConvertSolidToArea(pdfW, path[j + 1], path[j]);
 				p *= pdfA;
@@ -293,8 +300,7 @@ double Path_Pdf(const std::vector<PathVertex>& path, int s, int t) {
 	return p;
 }
 
-double MISWeight2(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& cameraPath,
-	int s, int t, PathVertex& sampled) {
+double MISWeight2(const Scene& scene, Sampler& sampler, std::vector<PathVertex>& lightPath, std::vector<PathVertex>& cameraPath, int s, int t, PathVertex& sampled) {
 	if (s + t == 2) return 1.0;
 
 	PathVertex* LightVertex = s > 0 ? &lightPath[s - 1] : nullptr,
@@ -309,7 +315,7 @@ double MISWeight2(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& c
 	std::vector<PathVertex> fullPath;
 	for (int i = 0; i < s; ++i) fullPath.push_back(lightPath[i]);
 	for (int i = t - 1; i >= 0; --i) fullPath.push_back(cameraPath[i]);
-	double Pdf_s = Path_Pdf(fullPath, s, t);
+	double Pdf_s = Path_Pdf(scene, sampler, fullPath, s, t);
 	double Pdf_all = 0;
 
 	for (int nLightVertices = 0; nLightVertices <= s + t - 1; ++nLightVertices) {
@@ -317,7 +323,7 @@ double MISWeight2(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& c
 		if (nLightVertices >= 2 && fullPath[nLightVertices - 1].isect.Delta) continue;
 		if (nLightVertices >= 2 && fullPath[nLightVertices].isect.Delta) continue;
 
-		Pdf_all += Path_Pdf(fullPath, nLightVertices, nCameraVertices);
+		Pdf_all += Path_Pdf(scene, sampler, fullPath, nLightVertices, nCameraVertices);
 
 	}
 	//std::cout << Pdf_s << std::endl;
@@ -332,8 +338,10 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 	if (t > 1 && s != 0 && cameraPath[t - 1].isect.IsLight) return Vec3(0, 0, 0);
 
 	if (s == 0) {
+		double pdfLight;
+		Light* pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
 		const PathVertex& cameraVertex = cameraPath[t - 1];
-		if (cameraVertex.isect.IsLight) L = cameraVertex.mThroughput * Scene::spheres[Scene::numSpheres - 1].e;
+		if (cameraVertex.isect.IsLight) L = cameraVertex.mThroughput * pLight->Emission();
 	}
 	else if (t == 1) {
 
@@ -346,8 +354,8 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 
 			*inScreen = true;
 			Vec3 dirHitPointToCam = camera.o - lightVertex.isect.HitPoint;
-			dirHitPointToCam.norm();
-			if (camera.d.dot(-1 * dirHitPointToCam) < 0) {
+			dirHitPointToCam.Normalize();
+			if (camera.d.Dot(-1 * dirHitPointToCam) < 0) {
 				*inScreen = false;
 				L = Vec3(0, 0, 0);
 			}
@@ -373,7 +381,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 				sampled.isect.Normal = camera.d;
 				sampled.mThroughput = We / PdfW;
 				sampled.mPdfFwd = camera.PdfPos();
-				L = We * lightVertex.mThroughput * f * wi.dot(lightVertex.isect.Normal) / PdfW;
+				L = We * lightVertex.mThroughput * f * wi.Dot(lightVertex.isect.Normal) / PdfW;
 			}
 
 		}
@@ -389,15 +397,15 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			//Vec3 localZ = (light.p - cameraVertex.isect.HitPoint).norm(), localX, localY;
 			//CoordinateSystem(localZ, &localX, &localY);
 
-			//double SinThetaMax = light.rad / (light.p - cameraVertex.isect.HitPoint).length();
+			//double SinThetaMax = light.rad / (light.p - cameraVertex.isect.HitPoint).Length();
 			//double CosThetaMax = std::sqrt(1 - SinThetaMax * SinThetaMax);
 			//Vec3 wi = UniformSampleCone(sampler.Get3D(), CosThetaMax, localX, localY, localZ);
 			//double PdfW = UniformConePdf(CosThetaMax);
 
 			////calculate the hit point and normal
-			//double CosTheta = wi.dot(localZ);
+			//double CosTheta = wi.Dot(localZ);
 			//double SinTheta = std::sqrt(std::max(0.0, 1 - CosTheta * CosTheta));
-			//double dc = (light.p - cameraVertex.isect.HitPoint).length();
+			//double dc = (light.p - cameraVertex.isect.HitPoint).Length();
 			//double ds = dc * CosTheta - std::sqrt(std::max(0.0, light.rad * light.rad - dc * dc * SinTheta * SinTheta));
 			//Vec3 HitPoint = cameraVertex.isect.HitPoint + ds * wi;
 			//Vec3 HitNormal = (HitPoint - light.p).norm();
@@ -407,7 +415,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			//Intersection isect;
 			//Vec3 f = cameraVertex.isect.bsdf->f(cameraVertex.isect.wo, wi);
 			//if (!scene.Intersect(shadowRay, t, isect) || !isect.IsLight) L = Vec3(0.0, 0.0, 0.0);
-			//else L = cameraVertex.mThroughput * f * wi.dot(cameraVertex.isect.Normal) * light.e / PdfW;
+			//else L = cameraVertex.mThroughput * f * wi.Dot(cameraVertex.isect.Normal) * light.e / PdfW;
 
 			double pdfLight;
 			PathVertex sampledVertex;
@@ -434,21 +442,21 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 				, cameraVertex.isect.HitPoint + eps * cameraVertex.isect.Normal))
 		{
 			Vec3 cameraTolight = lightVertex.isect.HitPoint - cameraVertex.isect.HitPoint;
-			cameraTolight.norm();
+			cameraTolight.Norm();
 			Vec3 fsE = cameraVertex.isect.bsdf->f(cameraVertex.isect.wo, cameraTolight);
 			Vec3 fsL = lightVertex.isect.bsdf->f(lightVertex.isect.wo, -1 * cameraTolight);
 			double GeometryTerm = G(lightVertex, cameraVertex);
 			L = cameraVertex.mThroughput * fsE * GeometryTerm * fsL * lightVertex.mThroughput;
 		}
 	}
-	//double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(lightPath, cameraPath, s, t, sampled));
-	double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(lightPath, cameraPath, s, t, sampled));
+	double MIS = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight(scene, sampler, lightPath, cameraPath, s, t, sampled));
+	//double MIS2 = (L == Vec3(0.0, 0.0, 0.0) ? 0.0 : MISWeight2(scene, sampler, lightPath, cameraPath, s, t, sampled));
 	//if (std::abs(MIS2 - MIS) > 0.1) {
 	//	std::cout << "MIS error " << "MIS: " << MIS << " MIS2: " << MIS2 << std::endl;
 	//}
 	//std::cout << "MIS: " << MIS << " MIS2: " << MIS2 << std::endl;
-	L = MIS2 * L;
-	if (MISRecord) *MISRecord = MIS2;
+	L = MIS * L;
+	if (MISRecord) *MISRecord = MIS;
 	return L;
 }
 
@@ -476,7 +484,7 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 	Film* film = camera.GetFilm();
 	int64_t resX = film->resX;
 	int64_t resY = film->resY;
-	int totalLightSamples = resX * resY * mSpp;
+	int64_t totalLightSamples = resX * resY * mSpp;
 #pragma omp parallel for schedule(dynamic, 1)
 	for (int y = 0; y < resY; ++y) {
 		fprintf(stderr, "\rRendering %5.2f%%", (1.0 * y * resX) / resX / resY * 100.0);
@@ -494,7 +502,7 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 				Vec3 p0 = film->LU + alpha * (film->RU - film->LU);
 				Vec3 p1 = film->LL + alpha * (film->RL - film->LL);
 				Vec3 p = p0 + beta * (p1 - p0);
-				Vec3 d = (p - camera.o).norm();
+				Vec3 d = (p - camera.o).Norm();
 
 
 				Ray cameraRay(camera.o, d);
@@ -509,8 +517,8 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 						if (depth < 0 || depth > mMaxDepth || (s == 1 && t == 1)) continue;
 						//if (depth <= 0 || depth > maxDepth ) continue;
 						double misRecord;
-						Vec3 pRaster = Vec3(x, y);
-						Vec3 pFilmNew = Vec3(x, y);
+						Vec3 pRaster = Vec3(x, y, 0);
+						Vec3 pFilmNew = Vec3(x, y, 0);
 						Vec3 Lpath = ConnectBDPT(scene, camera, *mpSampler, lightPath, cameraPath, s, t, &pRaster, &inScreen, &misRecord);
 
 						if (mVisualizeStrategies || mVisualizeWeight) {
@@ -534,7 +542,7 @@ void BidirectionalPathTracing::Render(const Scene& scene, const Camera& camera) 
 					}
 				}
 			}
-			film->AddSample(Vec3(x, y), L);
+			film->AddSample(Vec3(x, y, 0), L);
 		}
 	}
 	film->WriteToImage();

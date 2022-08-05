@@ -16,10 +16,8 @@ public:
 	int GenerateCameraRay(const CameraSample &sample, Ray &ray);
 	Vec3 We(const Ray &ray) const {
 		double PdfA = 1.0; // for the pinhole camera
-		//double A = (film->LU - film->LL).length() * (film->RU - film->LU).length();
-		//double A = film->width * film->heigh;
 		double A = film->Area;
-		double CosTheta = d.dot(ray.d);
+		double CosTheta = d.Dot(ray.d);
 		double CosTheta2 = CosTheta * CosTheta;
 		double Value = dis * dis * PdfA / (A * CosTheta2 * CosTheta2);
 		return Vec3(Value, Value, Value);
@@ -27,9 +25,9 @@ public:
 
 	Vec3 Sample_Wi(const Intersection &isect, double *PdfW, Vec3 *wi) const {
 		*wi = (o - isect.HitPoint);
-		double distance = wi->length();
-		wi->norm();
-		double CosTheta = d.dot(-1 * (*wi));
+		double distance = wi->Length();
+		wi->Normalize();
+		double CosTheta = d.Dot(-1 * (*wi));
 		*PdfW = 1.0 * (distance * distance) / CosTheta;
 		//*PdfW = 1.0 * (dis / CosTheta) * (dis / CosTheta) / CosTheta;
 		return We(Ray(isect.HitPoint, -1 * (*wi)));
@@ -41,39 +39,54 @@ public:
 
 	double PdfDir(const Ray &cameraRay) const {
 		double AreaFilm = film->Area;
-		double CosTheta = std::abs(d.dot(cameraRay.d));
+		double CosTheta = std::abs(d.Dot(cameraRay.d));
 		double Cos2Theta = CosTheta * CosTheta;
 		return dis * dis / (AreaFilm * Cos2Theta * CosTheta);
 	}
 
 	Vec3 WordToScreen(const Vec3 &HitPoint, bool *inScreen) const {
 		*inScreen = true;
-		Vec3 dir = (HitPoint - o).norm();
-		double CosCamera = d.dot(dir);
+		Vec3 dir = (HitPoint - o).Norm();
+		double CosCamera = d.Dot(dir);
 		double CameraToScreenDis = dis / CosCamera;
 		Vec3 PointScreen = o + dir * CameraToScreenDis;
 
 		Vec3 ScreenCenter = o + dis * d;
 		Vec3 CenterToPoint = PointScreen - ScreenCenter;
-		if (std::abs(CenterToPoint.dot(u)) > (film->LU - film->RU).length() / 2.f ||
-			std::abs(CenterToPoint.dot(v)) > (film->LL - film->LU).length() / 2.f) {
+		if (std::abs(CenterToPoint.Dot(u)) > (film->LU - film->RU).Length() / 2.f ||
+			std::abs(CenterToPoint.Dot(v)) > (film->LL - film->LU).Length() / 2.f) {
 			*inScreen = false;
 			return Vec3(-1, -1, -1); //out of screen
 		}
 
 		Vec3 LU_P = PointScreen - film->LU;
-		double dis_LUP = LU_P.length();
-		double CosTheta = (film->LL - film->LU).norm().dot(LU_P.norm());
+		double dis_LUP = LU_P.Length();
+		double CosTheta = (film->LL - film->LU).Norm().Dot(LU_P.Norm());
 		double SinTheta = std::sqrt(1 - CosTheta * CosTheta);
 		double pH = dis_LUP * CosTheta;
 		double pW = dis_LUP * SinTheta;
-		double alpha = pW / (film->RU - film->LU).length();
-		double beta = pH / (film->LL - film->LU).length();
+		double alpha = pW / (film->RU - film->LU).Length();
+		double beta = pH / (film->LL - film->LU).Length();
 		
 		int px = (int)(film->resX * alpha);
 		int py = (int)(film->resY * beta);
 
-		return Vec3(px, py);
+		return Vec3(px, py, 0);
+	}
+
+	Ray GenerateRay(int pixelX, int pixelY, const Vec2& sample, double offset = 0) const {
+		double u = sample[0] - 0.5f;
+		double v = sample[1] - 0.5f;
+		double imageX = pixelX + 0.5 + u;
+		double imageY = pixelY + 0.5 + v;
+		double alpha = imageX / (double)(film->resX);
+		double beta = imageY / (double)(film->resY);
+		Vec3 p0 = film->LU + alpha * (film->RU - film->LU);
+		Vec3 p1 = film->LL + alpha * (film->RL - film->LL);
+		Vec3 p = p0 + beta * (p1 - p0);
+		Vec3 d = (p - o).Norm();
+		Ray cameraRay(o, d);
+		return cameraRay;
 	}
 
 	Film* GetFilm() const  {

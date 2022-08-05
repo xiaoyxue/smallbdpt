@@ -1,9 +1,23 @@
 #ifndef SMALLBPT_H
 #define SMALLBPT_H
 
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstdio>
+#include <cstddef>
+#include <cstdint>
+#include <utility>
+#include <type_traits>
+#include <cstdint>
+#include <algorithm>
+#include <functional>
 #include <memory>
-#include <limits>
-
+#include <csignal>
+#include <vector>
+#include <map>
+#include <list>
+#include "Platform.h"
 
 constexpr double PI = 3.14159265358979;
 constexpr double INV_PI = 0.31830988618379067154;
@@ -45,5 +59,45 @@ inline T Clamp(T val, U low, V high) {
 		return val;
 }
 
+#define ISE_NONE
+#define USING_DOUBLE
+
+#if defined(GYT_PLATFORM_WINDOWS)
+#define GYT_FORCE_INLINE __forceinline
+#else
+#define FORCE_INLINE inline __attribute__((always_inline))
+#endif
+
+#if defined(GYT_COMPILER_MSVC)
+#define GYT_ALIGNED(x) __declspec(align(x))
+#endif
+
+
+/***************** Type ******************/
+using uchar = unsigned char;
+
+using int8 = int8_t;
+using uint8 = uint8_t;
+
+using int16 = int16_t;
+using uint16 = uint16_t;
+
+using int32 = int32_t;
+using uint32 = uint32_t;
+
+using int64 = int64_t;
+using uint64 = uint64_t;
+
+using float32 = float;
+using float64 = double;
+
+
+#ifdef USING_DOUBLE
+using real = double;
+using real_bit = uint64;
+#else
+using real = float;
+using real_bit = uint32;
+#endif
 
 #endif

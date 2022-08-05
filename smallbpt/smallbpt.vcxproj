@@ -160,18 +160,22 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Integrator.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightTracing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PathTracing.cpp" />
+    <ClCompile Include="PT.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Sampling.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="TiledIntegrator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BDPT.h" />
     <ClInclude Include="BSDF.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraV2.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Integrator.h" />
@@ -182,13 +186,16 @@
     <ClInclude Include="PathTracing.h" />
     <ClInclude Include="PathVertex.h" />
     <ClInclude Include="Platform.h" />
+    <ClInclude Include="PT.h" />
     <ClInclude Include="Rng.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="Sampling.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ScopedAssignment.h" />
+    <ClInclude Include="SIMD.h" />
     <ClInclude Include="Smallbpt.h" />
     <ClInclude Include="Threading.h" />
+    <ClInclude Include="TiledIntegrator.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
