@@ -6,7 +6,7 @@
 
 class PathVertex {
 public:
-	Intersection isect;
+	Intersection mIsect;
 	Vec3 mThroughput;
 	double mPdfFwd = 0.0, mPdfPrev = 0.0;
 	Camera *mpCamera;

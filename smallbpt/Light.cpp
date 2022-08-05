@@ -53,8 +53,8 @@ Vec3 SphereLight::DirectIllumination(const Scene& scene, Sampler& sampler, const
 
 	if(sampled) {
 		sampled->mThroughput = mpSphere->Emission() / PdfW;
-		sampled->isect.HitPoint = HitPoint;
-		sampled->isect.Normal = HitNormal;
+		sampled->mIsect.HitPoint = HitPoint;
+		sampled->mIsect.Normal = HitNormal;
 	}
 
 	return L;
@@ -102,8 +102,8 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 
 	if (sampled) {
 		sampled->mThroughput = mpShape->Emission() / pdfW;
-		sampled->isect.HitPoint = lightPoint.HitPoint;
-		sampled->isect.Normal = lightPoint.HitPoint;
+		sampled->mIsect.HitPoint = lightPoint.HitPoint;
+		sampled->mIsect.Normal = lightPoint.HitPoint;
 	}
 
 	return L;
