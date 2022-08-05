@@ -31,7 +31,7 @@ int GenerateLightPath(const Scene& scene, Sampler &sampler, std::vector<PathVert
 int GenerateCameraPath(const Scene& scene, const Camera& camera, Sampler &sampler, std::vector<PathVertex> &cameraPath, const Ray &cameraRay, int maxdepth) {
 	if (maxdepth == 0) return 0;
 	Vec3 throughput(1.0, 1.0, 1.0);
-	// Throughtput = We * CosTheta / Pdfpos / PdfW = (1, 1, 1)
+	// Throughtput = We * CosTheta / Pdfpos / pdfW = (1, 1, 1)
 	cameraPath[0].isect.HitPoint = camera.o;
 	cameraPath[0].isect.Normal = camera.d;
 	cameraPath[0].mPdfFwd = camera.PdfPos();
@@ -47,7 +47,7 @@ int GenerateCameraPath(const Scene& scene, const Camera& camera, Sampler &sample
 int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sampler &sampler, std::vector<PathVertex> &Path, int depth, int maxDepth) {
 	Ray r = ray;
 	int bound = depth;
-	double PdfW = pdfFwd;
+	double pdfW = pdfFwd;
 	while (1) {
 		PathVertex &prev = Path[bound - 1];
 		PathVertex &vertex = Path[bound];
@@ -58,20 +58,20 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 
 		
 		Path[bound].mThroughput = throughput;
-		Path[bound].mPdfFwd = ConvertSolidToArea(PdfW, prev, vertex);
+		Path[bound].mPdfFwd = ConvertSolidToArea(pdfW, prev, vertex);
  		++bound;
 		if (bound >= maxDepth + 1) break;
 
 		Vec3 wo;
-		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &PdfW, sampler.Get3D());
+		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &pdfW, sampler.Get3D());
 		wo.Normalize();
-		throughput = throughput * f * (std::abs(wo.Dot(isect.Normal))) / PdfW;
+		throughput = throughput * f * (std::abs(wo.Dot(isect.Normal))) / pdfW;
 
-		double PdfWPrev = isect.bsdf->Pdf(wo, -1 * r.d);
-		prev.mPdfPrev = ConvertSolidToArea(PdfWPrev, vertex, prev);
+		double pdfWPrev = isect.bsdf->Pdf(wo, -1 * r.d);
+		prev.mPdfPrev = ConvertSolidToArea(pdfWPrev, vertex, prev);
 		
 		if (isect.Delta) {
-			PdfW = PdfWPrev = 0;
+			pdfW = pdfWPrev = 0;
 		}
 
 		r.o = isect.HitPoint;// +wo * eps;
@@ -373,15 +373,15 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			//	return lightVertex.Throughput; //see the light source directly
 			//}
 			if (*inScreen) {
-				double PdfW;
+				double pdfW;
 				Vec3 wi;
-				Vec3 We = camera.Sample_Wi(lightVertex.isect, &PdfW, &wi);
+				Vec3 We = camera.Sample_Wi(lightVertex.isect, &pdfW, &wi);
 				Vec3 f = lightVertex.isect.bsdf->f(lightVertex.isect.wo, wi);
 				sampled.isect.HitPoint = camera.o;
 				sampled.isect.Normal = camera.d;
-				sampled.mThroughput = We / PdfW;
+				sampled.mThroughput = We / pdfW;
 				sampled.mPdfFwd = camera.PdfPos();
-				L = We * lightVertex.mThroughput * f * wi.Dot(lightVertex.isect.Normal) / PdfW;
+				L = We * lightVertex.mThroughput * f * wi.Dot(lightVertex.isect.Normal) / pdfW;
 			}
 
 		}
@@ -400,7 +400,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			//double SinThetaMax = light.rad / (light.p - cameraVertex.isect.HitPoint).Length();
 			//double CosThetaMax = std::sqrt(1 - SinThetaMax * SinThetaMax);
 			//Vec3 wi = UniformSampleCone(sampler.Get3D(), CosThetaMax, localX, localY, localZ);
-			//double PdfW = UniformConePdf(CosThetaMax);
+			//double pdfW = UniformConePdf(CosThetaMax);
 
 			////calculate the hit point and normal
 			//double CosTheta = wi.Dot(localZ);
@@ -415,7 +415,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			//Intersection isect;
 			//Vec3 f = cameraVertex.isect.bsdf->f(cameraVertex.isect.wo, wi);
 			//if (!scene.Intersect(shadowRay, t, isect) || !isect.IsLight) L = Vec3(0.0, 0.0, 0.0);
-			//else L = cameraVertex.mThroughput * f * wi.Dot(cameraVertex.isect.Normal) * light.e / PdfW;
+			//else L = cameraVertex.mThroughput * f * wi.Dot(cameraVertex.isect.Normal) * light.e / pdfW;
 
 			double pdfLight;
 			PathVertex sampledVertex;
@@ -427,7 +427,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			sampled.isect.HitPoint = sampledVertex.isect.HitPoint;
 			sampled.isect.Normal = sampledVertex.isect.Normal;
 
-			//sampled.mThroughput = light.e / PdfW ;
+			//sampled.mThroughput = light.e / pdfW ;
 			//sampled.mPdfFwd = lightPath[0].mPdfFwd;
 			//sampled.isect.HitPoint = HitPoint;
 			//sampled.isect.Normal = HitNormal;
