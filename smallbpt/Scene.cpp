@@ -121,7 +121,7 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 		else if (pShape->ReflectType() == REFR) {
 			isect->mpBSDF = std::make_shared<SpecularTransmission>(isect->mNormal, isect->mSurfaceNormal, pShape->Color(), 1.0, 1.5);
 		}
-		isect->wo = -1 * r.d;
+		isect->mOutDir = -1 * r.d;
 		isect->mIsDelta = isect->mpBSDF->IsDelta();
 		isect->IsLight = (shapes[id]->Emission() != Vec3());
 		if (isect->IsLight) {

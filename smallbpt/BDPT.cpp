@@ -375,7 +375,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 				double pdfW;
 				Vec3 wi;
 				Vec3 We = camera.Sample_Wi(lightVertex.mIsect, &pdfW, &wi);
-				Vec3 f = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.wo, wi);
+				Vec3 f = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.mOutDir, wi);
 				sampled.mIsect.mPos = camera.o;
 				sampled.mIsect.mNormal = camera.d;
 				sampled.mThroughput = We / pdfW;
@@ -442,8 +442,8 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 		{
 			Vec3 cameraTolight = lightVertex.mIsect.mPos - cameraVertex.mIsect.mPos;
 			cameraTolight.Norm();
-			Vec3 fsE = cameraVertex.mIsect.mpBSDF->f(cameraVertex.mIsect.wo, cameraTolight);
-			Vec3 fsL = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.wo, -1 * cameraTolight);
+			Vec3 fsE = cameraVertex.mIsect.mpBSDF->f(cameraVertex.mIsect.mOutDir, cameraTolight);
+			Vec3 fsL = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.mOutDir, -1 * cameraTolight);
 			double GeometryTerm = G(lightVertex, cameraVertex);
 			L = cameraVertex.mThroughput * fsE * GeometryTerm * fsL * lightVertex.mThroughput;
 		}

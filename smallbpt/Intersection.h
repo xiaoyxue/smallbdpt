@@ -14,7 +14,7 @@ public:
 	Vec3 mPos;
 	Vec3 mNormal;
 	Vec3 mSurfaceNormal;
-	Vec3 wo;
+	Vec3 mOutDir;
 	bool mIsDelta;
 	bool IsLight;
 	Shape* pLight;
