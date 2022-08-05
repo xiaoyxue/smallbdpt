@@ -12,8 +12,8 @@ public:
 	int id;
 #endif
 	Vec3 mPos;
-	Vec3 Normal;
-	Vec3 SurfaceNormal;
+	Vec3 mNormal;
+	Vec3 mSurfaceNormal;
 	Vec3 wo;
 	bool Delta;
 	bool IsLight;

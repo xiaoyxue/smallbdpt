@@ -21,8 +21,8 @@ Vec3 SphereLight::SampleFromLight(Intersection* lightPoint, Vec3* dir, double* p
 	*dir = (ss * dirLocal.x + ts * dirLocal.y + lightNormal * dirLocal.z).Norm();
 	*pdfDir = CosineHemispherePdf(*cosTheta);
 	lightPoint->mPos = pos;
-	lightPoint->Normal = lightNormal;
-	lightPoint->SurfaceNormal = lightNormal;
+	lightPoint->mNormal = lightNormal;
+	lightPoint->mSurfaceNormal = lightNormal;
 	return mpSphere->Emission();
 }
 
@@ -49,12 +49,12 @@ Vec3 SphereLight::DirectIllumination(const Scene& scene, Sampler& sampler, const
 	Intersection isection;
 	Vec3 f = isect.bsdf->f(isect.wo, wi);
 	if (!scene.Intersect(shadowRay, &isection) || !isection.IsLight) L = Vec3(0.0, 0.0, 0.0);
-	else L = throughput * f * std::abs(wi.Dot(isect.Normal)) * Emission() / PdfW;
+	else L = throughput * f * std::abs(wi.Dot(isect.mNormal)) * Emission() / PdfW;
 
 	if(sampled) {
 		sampled->mThroughput = mpSphere->Emission() / PdfW;
 		sampled->mIsect.mPos = HitPoint;
-		sampled->mIsect.Normal = HitNormal;
+		sampled->mIsect.mNormal = HitNormal;
 	}
 
 	return L;
@@ -70,10 +70,10 @@ Vec3 AreaLight::SampleFromLight(Intersection* lightPoint, Vec3* dir, double* pdf
 {
 	*lightPoint = mpShape->Sample(pdfPos, sampler.Get3D());
 	Vec3 ss, ts;
-	CoordinateSystem(lightPoint->Normal, &ss, &ts);
+	CoordinateSystem(lightPoint->mNormal, &ss, &ts);
 	Vec3 dirLocal = CosineSampleHemisphere(sampler.Get3D());
 	*cosTheta = dirLocal.z;
-	*dir = (ss * dirLocal.x + ts * dirLocal.y + lightPoint->Normal * dirLocal.z).Norm();
+	*dir = (ss * dirLocal.x + ts * dirLocal.y + lightPoint->mNormal * dirLocal.z).Norm();
 	*pdfDir = CosineHemispherePdf(*cosTheta);
 
 	return Emission();
@@ -88,7 +88,7 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 	double dis = wi.Length();
 	double dis2 = dis * dis;
 	wi = wi.Norm();
-	pdfW = pdfA * dis2 / std::abs(lightPoint.Normal.Dot(-1 * wi));
+	pdfW = pdfA * dis2 / std::abs(lightPoint.mNormal.Dot(-1 * wi));
 	Vec3 f = isect.bsdf->f(isect.wo, wi);
 	Ray shadowRay(isect.mPos, wi);
 	Intersection isection;
@@ -97,13 +97,13 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 		return Vec3();
 	}
 	else {
-		L = throughput * f * std::abs(wi.Dot(isect.Normal)) * Emission() / pdfW;
+		L = throughput * f * std::abs(wi.Dot(isect.mNormal)) * Emission() / pdfW;
 	}
 
 	if (sampled) {
 		sampled->mThroughput = mpShape->Emission() / pdfW;
 		sampled->mIsect.mPos = lightPoint.mPos;
-		sampled->mIsect.Normal = lightPoint.mPos;
+		sampled->mIsect.mNormal = lightPoint.mPos;
 	}
 
 	return L;

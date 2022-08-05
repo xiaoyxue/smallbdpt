@@ -19,7 +19,7 @@ int GenerateLightPath(const Scene& scene, Sampler &sampler, std::vector<PathVert
 
 	Ray ray(pos + lightDir * eps, lightDir);
 	lightPath[0].mIsect.mPos = pos;
-	lightPath[0].mIsect.Normal = lightPoint.Normal;
+	lightPath[0].mIsect.mNormal = lightPoint.mNormal;
 	lightPath[0].mThroughput = Le; // / Pdfdir / Pdfpos * CosTheta;
 	lightPath[0].mPdfFwd = pdfPos * pdfLight;
 	lightPath[0].mIsect.Delta = false;
@@ -33,7 +33,7 @@ int GenerateCameraPath(const Scene& scene, const Camera& camera, Sampler &sample
 	Vec3 throughput(1.0, 1.0, 1.0);
 	// Throughtput = We * CosTheta / Pdfpos / pdfW = (1, 1, 1)
 	cameraPath[0].mIsect.mPos = camera.o;
-	cameraPath[0].mIsect.Normal = camera.d;
+	cameraPath[0].mIsect.mNormal = camera.d;
 	cameraPath[0].mPdfFwd = camera.PdfPos();
 	cameraPath[0].mThroughput = throughput;
 	double Pdfdir = camera.PdfDir(cameraRay);
@@ -64,7 +64,7 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 		Vec3 wo;
 		Vec3 f = isect.bsdf->Sample_f(-1 * r.d, &wo, &pdfW, sampler.Get3D());
 		wo.Normalize();
-		throughput = throughput * f * (std::abs(wo.Dot(isect.Normal))) / pdfW;
+		throughput = throughput * f * (std::abs(wo.Dot(isect.mNormal))) / pdfW;
 
 		double pdfWPrev = isect.bsdf->Pdf(wo, -1 * r.d);
 		prev.mPdfPrev = ConvertSolidToArea(pdfWPrev, vertex, prev);
@@ -86,7 +86,7 @@ double ConvertSolidToArea(double pdfW, const PathVertex &vertex, const PathVerte
 	double dist2 = dist * dist;
 	if (dist2 == 0) return 0;
 	dir.Normalize();
-	double cosTheta = std::abs(dir.Dot(nextVertex.mIsect.Normal));
+	double cosTheta = std::abs(dir.Dot(nextVertex.mIsect.mNormal));
 	return pdfW * cosTheta / dist2;
 }
 
@@ -103,8 +103,8 @@ double G(const PathVertex &vertexA, const PathVertex &vertexB) {
 	Vec3 dirAtoB = vertexB.mIsect.mPos - vertexA.mIsect.mPos;
 	double dist = dirAtoB.Length();
 	dirAtoB.Normalize();
-	double cosThetaA = std::abs(dirAtoB.Dot(vertexA.mIsect.Normal));
-	double cosThetaB = std::abs(dirAtoB.Dot(vertexB.mIsect.Normal));
+	double cosThetaA = std::abs(dirAtoB.Dot(vertexA.mIsect.mNormal));
+	double cosThetaB = std::abs(dirAtoB.Dot(vertexB.mIsect.mNormal));
 	double g = cosThetaA * cosThetaB / dist / dist;
 	return g;
 }
@@ -137,7 +137,7 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 			if (lightVertexMinus == nullptr) {
 				Vec3 lightToHitPoint = cameraVertex->mIsect.mPos - lightVertex->mIsect.mPos;
 				lightToHitPoint.Norm();
-				double CosTheta = lightVertex->mIsect.Normal.Dot(lightToHitPoint);
+				double CosTheta = lightVertex->mIsect.mNormal.Dot(lightToHitPoint);
 				pdfW = CosineHemispherePdf(CosTheta);
 				pdfA = ConvertSolidToArea(pdfW, *lightVertex, *cameraVertex);
 			}
@@ -176,10 +176,10 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 			double dist = hitPointToLight.Length();
 			hitPointToLight.Normalize();
 			Vec3 lightToHitPoint = -1 * hitPointToLight;
-			Vec3 lightNormal = cameraVertex->mIsect.Normal;
+			Vec3 lightNormal = cameraVertex->mIsect.mNormal;
 			double CosThetaLight = std::abs(lightNormal.Dot(lightToHitPoint));
 			double pdfW = CosineHemispherePdf(CosThetaLight);
-			double pdfA = pdfW * (std::abs(cameraVertexMinus->mIsect.Normal.Dot(hitPointToLight))) / dist / dist;
+			double pdfA = pdfW * (std::abs(cameraVertexMinus->mIsect.mNormal.Dot(hitPointToLight))) / dist / dist;
 			a5 = { &cameraVertexMinus->mPdfPrev, pdfA };
 		}
 
@@ -192,7 +192,7 @@ double MISWeight(const Scene &scene, Sampler &sampler, std::vector<PathVertex>& 
 		if (cameraVertexMinus == nullptr) {
 			Vec3 cameraToHitPoint = lightVertex->mIsect.mPos - cameraVertex->mIsect.mPos;
 			cameraToHitPoint.Normalize();
-			double cosTheta = std::abs(cameraVertex->mIsect.Normal.Dot(cameraToHitPoint));
+			double cosTheta = std::abs(cameraVertex->mIsect.mNormal.Dot(cameraToHitPoint));
 			Ray ray(cameraVertex->mIsect.mPos, cameraToHitPoint);
 			pdfW = cameraVertex->mpCamera->PdfDir(ray);
 			pdfA = ConvertSolidToArea(pdfW, *cameraVertex, *lightVertex);
@@ -255,7 +255,7 @@ double Path_Pdf(const Scene &scene, Sampler &sampler, const std::vector<PathVert
 		}
 		else if (i == 1) {
 			Vec3 lightToHitPoint = (path[1].mIsect.mPos - path[0].mIsect.mPos).Norm();
-			double cosThetaLight = std::abs(path[0].mIsect.Normal.Dot(lightToHitPoint));
+			double cosThetaLight = std::abs(path[0].mIsect.mNormal.Dot(lightToHitPoint));
 			double pdfW = CosineHemispherePdf(cosThetaLight);
 			double pdfA = ConvertSolidToArea(pdfW, path[0], path[1]);
 			p *= pdfA;
@@ -377,10 +377,10 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 				Vec3 We = camera.Sample_Wi(lightVertex.mIsect, &pdfW, &wi);
 				Vec3 f = lightVertex.mIsect.bsdf->f(lightVertex.mIsect.wo, wi);
 				sampled.mIsect.mPos = camera.o;
-				sampled.mIsect.Normal = camera.d;
+				sampled.mIsect.mNormal = camera.d;
 				sampled.mThroughput = We / pdfW;
 				sampled.mPdfFwd = camera.PdfPos();
-				L = We * lightVertex.mThroughput * f * wi.Dot(lightVertex.mIsect.Normal) / pdfW;
+				L = We * lightVertex.mThroughput * f * wi.Dot(lightVertex.mIsect.mNormal) / pdfW;
 			}
 
 		}
@@ -424,7 +424,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			sampled.mThroughput = sampledVertex.mThroughput / pdfLight;
 			sampled.mPdfFwd = lightPath[0].mPdfFwd;
 			sampled.mIsect.mPos = sampledVertex.mIsect.mPos;
-			sampled.mIsect.Normal = sampledVertex.mIsect.Normal;
+			sampled.mIsect.mNormal = sampledVertex.mIsect.mNormal;
 
 			//sampled.mThroughput = light.e / pdfW ;
 			//sampled.mPdfFwd = lightPath[0].mPdfFwd;
@@ -437,8 +437,8 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 		const PathVertex& lightVertex = lightPath[s - 1], & cameraVertex = cameraPath[t - 1];
 		//Be careful, if hit points on one object, we need to use normal to correct the point position
 		if (!lightVertex.mIsect.Delta && !cameraVertex.mIsect.Delta
-			&& IsConnectable(scene, lightVertex.mIsect.mPos + eps * lightVertex.mIsect.Normal
-				, cameraVertex.mIsect.mPos + eps * cameraVertex.mIsect.Normal))
+			&& IsConnectable(scene, lightVertex.mIsect.mPos + eps * lightVertex.mIsect.mNormal
+				, cameraVertex.mIsect.mPos + eps * cameraVertex.mIsect.mNormal))
 		{
 			Vec3 cameraTolight = lightVertex.mIsect.mPos - cameraVertex.mIsect.mPos;
 			cameraTolight.Norm();

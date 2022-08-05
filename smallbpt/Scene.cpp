@@ -110,16 +110,16 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 
 	if (t < Inf) {
 		isect->mPos = r.o + t * r.d;
-		isect->SurfaceNormal = shapes[id]->GetNormal(isect->mPos);
-		isect->Normal = isect->SurfaceNormal.Dot(r.d) < 0 ? isect->SurfaceNormal : -1 * isect->SurfaceNormal;
+		isect->mSurfaceNormal = shapes[id]->GetNormal(isect->mPos);
+		isect->mNormal = isect->mSurfaceNormal.Dot(r.d) < 0 ? isect->mSurfaceNormal : -1 * isect->mSurfaceNormal;
 		if (pShape->ReflectType() == DIFF) {
-			isect->bsdf = std::make_shared<LambertianBSDF>(isect->Normal, isect->SurfaceNormal, pShape->Color());
+			isect->bsdf = std::make_shared<LambertianBSDF>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
 		}
 		else if (pShape->ReflectType() == SPEC) {
-			isect->bsdf = std::make_shared<SpecularReflection>(isect->Normal, isect->SurfaceNormal, pShape->Color());
+			isect->bsdf = std::make_shared<SpecularReflection>(isect->mNormal, isect->mSurfaceNormal, pShape->Color());
 		}
 		else if (pShape->ReflectType() == REFR) {
-			isect->bsdf = std::make_shared<SpecularTransmission>(isect->Normal, isect->SurfaceNormal, pShape->Color(), 1.0, 1.5);
+			isect->bsdf = std::make_shared<SpecularTransmission>(isect->mNormal, isect->mSurfaceNormal, pShape->Color(), 1.0, 1.5);
 		}
 		isect->wo = -1 * r.d;
 		isect->Delta = isect->bsdf->IsDelta();
