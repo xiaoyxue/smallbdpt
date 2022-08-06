@@ -170,6 +170,7 @@
     <ClCompile Include="Sampling.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="TiledIntegrator.cpp" />
+    <ClCompile Include="VisibilityTester.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BDPT.h" />
@@ -197,9 +198,7 @@
     <ClInclude Include="Threading.h" />
     <ClInclude Include="TiledIntegrator.h" />
     <ClInclude Include="Utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="svpng.inc" />
+    <ClInclude Include="VisibilityTester.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

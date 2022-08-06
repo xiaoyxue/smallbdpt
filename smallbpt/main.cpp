@@ -13,7 +13,7 @@
 void SceneOne() {
 	int width = 1024, height = 768;
 
-	std::string filename = "Result/Image18.png";
+	std::string filename = "Result/Image20.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(50, 52, 295.6), d(0, -0.042612, -1);
@@ -41,7 +41,7 @@ void SceneOne() {
 void SceneTwo() {
 	int width = 1024, height = 1024;
 
-	std::string filename = "Result/Image14.png";
+	std::string filename = "Result/Image21.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(0, 0, 3), d(0, 0, -1);
@@ -63,15 +63,16 @@ void SceneTwo() {
 	bpt.Render(scene, camera);
 
 
-	//PathTracing pt(32, 15, &sampler);
+	//PathTracing pt(&sampler, 128, 5);
 	//pt.Render(scene, camera);
+
 }
 
 
 int main() {
 	
 	SceneOne();
-
+	//SceneTwo();
 	
 	return 0;
 }

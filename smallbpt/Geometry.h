@@ -88,8 +88,8 @@ public:
 	Triangle(Vec3 p0_, Vec3 p1_, Vec3 p2_, Vec3 normal_, Vec3 color_, Vec3 emission_, Refl_t refl_)
 		: p0(p0_), p1(p1_), p2(p2_), normal(normal_), color(color_), emission(emission_), refl(refl_)
 	{
-		Vec3 e1 = p1 - p0;
-		Vec3 e2 = p2 - p0;
+		e1 = p1 - p0;
+		e2 = p2 - p0;
 	}
 
 	bool Intersect(const Ray& ray, Intersection* isect, double* t) const override;

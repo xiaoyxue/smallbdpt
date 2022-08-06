@@ -8,9 +8,21 @@
 class BSDF;
 class Intersection {
 public:
-#ifdef _DEBUG
-	int id;
-#endif
+	Intersection() {
+		IsLight = false;
+		mIsDelta = false;
+	}
+
+	Ray SpawnRay(const Vec3& d) const {
+		return Ray(mPos + d * RayEps, d);
+	}
+
+	Ray SpawnTo(const Intersection& it) const {
+		Vec3 dir = (it.mPos - mPos);
+		double dis = dir.Length();
+		return Ray(mPos + RayEps * mNormal + RayEps * dir.Norm(), dir.Norm(), RayEps, dis);
+	}
+
 	Vec3 mPos;
 	Vec3 mNormal;
 	Vec3 mSurfaceNormal;
@@ -20,10 +32,7 @@ public:
 	Shape* pLight;
 	double b1, b2;
 	std::shared_ptr<BSDF> mpBSDF;
-	Intersection() {
-		IsLight = false;
-		mIsDelta = false;
-	}
+
 };
 
 #endif

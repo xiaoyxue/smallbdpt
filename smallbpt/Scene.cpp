@@ -68,25 +68,25 @@ Vec3 lightP3 = Vec3(-0.25f, 0.965f, 0.25f);
 //	new Triangle(p0, p1, p2, normalLeft, Vec3(.75f, .25f, .25f), Vec3(), DIFF),
 //	new Triangle(p2, p3, p0, normalLeft, Vec3(.75f, .25f, .25f), Vec3(), DIFF),
 //
-//	//right
-//	new Triangle(p4, p5, p6, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF),
-//	new Triangle(p4, p6, p7, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF),
+//	 //right
+//	 new Triangle(p4, p5, p6, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF),
+//	 new Triangle(p4, p6, p7, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF),
 //
-//	//back
-//	new Triangle(p1, p5, p6, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
-//	new Triangle(p1, p6, p2, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+//	 //back
+//	 new Triangle(p1, p5, p6, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+//	 new Triangle(p1, p6, p2, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
 //
-//	//bottom
-//	new Triangle(p0, p4, p5, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
-//	new Triangle(p0, p5, p1, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+//	 //bottom
+//	 new Triangle(p0, p4, p5, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+//	 new Triangle(p0, p5, p1, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
 //
-//	//top
-//	new Triangle(p3, p7, p6, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
-//	new Triangle(p3, p6, p2, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+//	 //top
+//	 new Triangle(p3, p7, p6, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+//	 new Triangle(p3, p6, p2, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
 //
-//	//light
-//	new Triangle(lightP0, lightP1, lightP2, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF),
-//	new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF)
+//	 //light
+//	 new Triangle(lightP0, lightP1, lightP2, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF),
+//	 new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF)
 //};
 //
 //std::vector<Light*> Scene::lights = {

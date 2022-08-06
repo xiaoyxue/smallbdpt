@@ -25,14 +25,15 @@ void TiledIntegrator::Render(const Scene& scene, const Camera& camera) {
 	const int tileCount = tiles.size();
 #pragma omp parallel for schedule(dynamic, 1)
 	for(int i = 0; i < tileCount; i++){
+		Sampler* pSampler = mpSampler->Clone(i);
 		const Tile& tile = tiles[i];
 		for (int y = tile.minY; y < tile.maxY; ++y) {
 			for (int x = tile.minX; x < tile.maxX; ++x) {
 				for (int spp = 0; spp < mSpp; ++spp) {
 					
-					Vec2 pixelSample = mpSampler->Get2D();
+					Vec2 pixelSample = pSampler->Get2D();
 					Ray ray = camera.GenerateRay(x, y, pixelSample, 0);
-					Vec3 L = Li(scene, ray);
+					Vec3 L = Li(ray, scene, *pSampler);
 					pFilm->AddSample(Vec3(x + pixelSample.x, y + pixelSample.y, 0), L );
 				}
 			}
@@ -40,6 +41,7 @@ void TiledIntegrator::Render(const Scene& scene, const Camera& camera) {
 		workDone += 1;
 		double percentage = 100.f * workDone / tileCount;
 		fprintf(stderr, "\rPercentage: %5.2f%%", percentage);
+		delete pSampler;
 	}
 	pFilm->WriteToImage();
 }

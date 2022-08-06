@@ -1,7 +1,6 @@
 #include "Film.h"
 #include "Smallbpt.h"
 #include <string>
-#include "svpng.inc"
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION

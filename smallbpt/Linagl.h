@@ -158,6 +158,12 @@ struct Vec3 {
 	inline double maxComponentValue() const {
 		return std::max(x, std::max(y, z));
 	}
+
+	double Y() const {
+		const real YWeight[3] = { (real)0.212671, (real)0.715160, (real)0.072169f };
+		return YWeight[0] * this->x + YWeight[1] * this->y + YWeight[2] * this->z;
+	}
+
 	std::string ToString() const {
 		std::string ret = "(";
 		ret += std::to_string(x); ret += ", ";
@@ -165,6 +171,7 @@ struct Vec3 {
 		ret += std::to_string(z); ret += ")";
 		return ret;
 	}
+
 	friend std::ostream& operator<<(std::ostream& os, const Vec3& v) {
 		return os << v.ToString();
 	}

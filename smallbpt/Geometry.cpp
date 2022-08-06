@@ -83,6 +83,8 @@ bool Triangle::Intersect(const Ray& ray, Intersection* isect, double* t) const {
 
 bool Triangle::Intersect(const Ray& ray) const
 {
+	//Vec3 e1 = p1 - p0;
+	//Vec3 e2 = p2 - p0;
 	Vec3 s1 = Cross(ray.d, e2);
 	double divisor = Dot(s1, e1);
 
@@ -111,6 +113,7 @@ bool Triangle::Intersect(const Ray& ray) const
 	double tHit = Dot(e2, s2) * invDivisor;
 	if (tHit < ray.tmin || tHit > ray.tmax)
 		return false;
+
 	return true;
 }
 
