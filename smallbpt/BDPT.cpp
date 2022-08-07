@@ -340,7 +340,10 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 		double pdfLight;
 		Light* pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
 		const PathVertex& cameraVertex = cameraPath[t - 1];
-		if (cameraVertex.mIsect.IsLight) L = cameraVertex.mThroughput * pLight->Emission();
+		if (cameraVertex.mIsect.IsLight && cameraVertex.mIsect.mNormal.Dot(cameraVertex.mIsect.mOutDir) > 0)
+		{
+			L = cameraVertex.mThroughput * cameraVertex.mIsect.pLight->Emission();
+		}
 	}
 	else if (t == 1) {
 
@@ -387,34 +390,8 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 
 	}
 	else if (s == 1) {
-		//const PathVertex &cameraVertex = cameraPath[t - 1];
-		//L = DirectIllumination(cameraVertex.mIsect, cameraVertex.Throughput, sampler);
-
 		const PathVertex& cameraVertex = cameraPath[t - 1];
 		if (!cameraVertex.mIsect.mIsDelta) {
-			//Sphere &light = Scene::spheres[Scene::numSpheres - 1];
-			//Vec3 localZ = (light.p - cameraVertex.mIsect.mPos).norm(), localX, localY;
-			//CoordinateSystem(localZ, &localX, &localY);
-
-			//double SinThetaMax = light.rad / (light.p - cameraVertex.mIsect.mPos).Length();
-			//double CosThetaMax = std::sqrt(1 - SinThetaMax * SinThetaMax);
-			//Vec3 wi = UniformSampleCone(sampler.Get3D(), CosThetaMax, localX, localY, localZ);
-			//double pdfW = UniformConePdf(CosThetaMax);
-
-			////calculate the hit point and normal
-			//double CosTheta = wi.Dot(localZ);
-			//double SinTheta = std::sqrt(std::max(0.0, 1 - CosTheta * CosTheta));
-			//double dc = (light.p - cameraVertex.mIsect.mPos).Length();
-			//double ds = dc * CosTheta - std::sqrt(std::max(0.0, light.rad * light.rad - dc * dc * SinTheta * SinTheta));
-			//Vec3 HitPoint = cameraVertex.mIsect.mPos + ds * wi;
-			//Vec3 HitNormal = (HitPoint - light.p).norm();
-
-			//Ray shadowRay(cameraVertex.mIsect.mPos, wi);
-			//double t; int id;
-			//Intersection isect;
-			//Vec3 f = cameraVertex.mIsect.bsdf->f(cameraVertex.mIsect.wo, wi);
-			//if (!scene.Intersect(shadowRay, t, isect) || !isect.IsLight) L = Vec3(0.0, 0.0, 0.0);
-			//else L = cameraVertex.mThroughput * f * wi.Dot(cameraVertex.mIsect.Normal) * light.e / pdfW;
 
 			double pdfLight;
 			PathVertex sampledVertex;
@@ -426,10 +403,6 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			sampled.mIsect.mPos = sampledVertex.mIsect.mPos;
 			sampled.mIsect.mNormal = sampledVertex.mIsect.mNormal;
 
-			//sampled.mThroughput = light.e / pdfW ;
-			//sampled.mPdfFwd = lightPath[0].mPdfFwd;
-			//sampled.mIsect.mPos = HitPoint;
-			//sampled.mIsect.Normal = HitNormal;
 		}
 	}
 	else {
