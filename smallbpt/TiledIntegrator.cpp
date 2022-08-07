@@ -25,12 +25,11 @@ void TiledIntegrator::Render(const Scene& scene, const Camera& camera) {
 	const int tileCount = tiles.size();
 #pragma omp parallel for schedule(dynamic, 1)
 	for(int i = 0; i < tileCount; i++){
-		Sampler* pSampler = mpSampler->Clone(i);
 		const Tile& tile = tiles[i];
+		Sampler* pSampler = mpSampler->Clone(i);
 		for (int y = tile.minY; y < tile.maxY; ++y) {
 			for (int x = tile.minX; x < tile.maxX; ++x) {
 				for (int spp = 0; spp < mSpp; ++spp) {
-					
 					Vec2 pixelSample = pSampler->Get2D();
 					Ray ray = camera.GenerateRay(x, y, pixelSample, 0);
 					Vec3 L = Li(ray, scene, *pSampler);

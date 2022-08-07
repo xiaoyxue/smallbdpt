@@ -81,31 +81,59 @@ Vec3 AreaLight::SampleFromLight(Intersection* lightPoint, Vec3* dir, double* pdf
 
 Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const Intersection& isect, const Vec3& throughput, PathVertex* sampled /*= 0*/) const
 {
-	Vec3 L;
-	double pdfA, pdfW;
-	Intersection lightPoint = mpShape->Sample(&pdfA, sampler.Get3D());
-	Vec3 wi = (lightPoint.mPos - isect.mPos);
-	double dis = wi.Length();
-	double dis2 = dis * dis;
-	wi = wi.Norm();
-	pdfW = pdfA * dis2 / std::abs(lightPoint.mNormal.Dot(-1 * wi));
-	Vec3 f = isect.mpBSDF->f(isect.mOutDir, wi);
-	Ray shadowRay(isect.mPos, wi);
-	Intersection isection;
-	scene.Intersect(shadowRay, &isection);
-	if (!isection.IsLight) {
-		return Vec3();
-	}
-	else {
-		L = throughput * f * std::abs(wi.Dot(isect.mNormal)) * Emission() / pdfW;
-	}
+	//Vec3 L;
+	//double pdfA, pdfW;
+	//Intersection lightPoint = mpShape->Sample(&pdfA, sampler.Get3D());
+	//Vec3 wi = (lightPoint.mPos - isect.mPos);
+	//double dis = wi.Length();
+	//double dis2 = dis * dis;
+	//wi = wi.Norm();
+	//pdfW = pdfA * dis2 / std::abs(lightPoint.mNormal.Dot(-1 * wi));
+	//Vec3 f = isect.mpBSDF->f(isect.mOutDir, wi);
+	//Ray shadowRay(isect.mPos, wi);
+	//Intersection isection;
+	//scene.Intersect(shadowRay, &isection);
+	//if (!isection.IsLight) {
+	//	return Vec3();
+	//}
+	//else {
+	//	L = throughput * f * std::abs(wi.Dot(isect.mNormal)) * Emission() / pdfW;
+	//}
 
-	if (sampled) {
-		sampled->mThroughput = mpShape->Emission() / pdfW;
-		sampled->mIsect.mPos = lightPoint.mPos;
-		sampled->mIsect.mNormal = lightPoint.mPos;
-	}
+	//if (sampled) {
+	//	sampled->mThroughput = mpShape->Emission() / pdfW;
+	//	sampled->mIsect.mPos = lightPoint.mPos;
+	//	sampled->mIsect.mNormal = lightPoint.mPos;
+	//}
 
+	Vec3 L(0, 0, 0);
+	if (!isect.mIsDelta) {
+		Light* pLight;
+		real pdfLight;
+		real pdfA, pdfW;
+		Intersection lightPoint;
+		pLight = scene.SampleOneLight(&pdfLight, rand());
+		Vec3 Le = pLight->Sample(&lightPoint, &pdfA, sampler.Get3D());
+		Vec3 hitToLight = lightPoint.mPos - isect.mPos;
+		real dis = hitToLight.Length();
+		hitToLight.Normalize();
+		real cosTheta0 = hitToLight.Dot(isect.mNormal);
+		real cosTheta1 = (-1 * hitToLight).Dot(lightPoint.mNormal);
+		pdfW = pdfA * dis * dis / std::abs(cosTheta1);
+		Vec3 f = isect.mpBSDF->f(isect.mOutDir, hitToLight);
+		Ray shadowRay(isect.mPos, hitToLight);
+		Intersection hit;
+		if (scene.Intersect(shadowRay, &hit) && cosTheta1 > 0) {
+			if (hit.IsLight) {
+				L = throughput * f * cosTheta0 * Emission() / pdfW / pdfLight;
+			}
+		}
+		if (sampled) {
+			sampled->mThroughput = mpShape->Emission() / pdfW;
+			sampled->mIsect.mPos = isect.mPos;
+			sampled->mIsect.mNormal = isect.mPos;
+		}
+	}
 	return L;
 
 }

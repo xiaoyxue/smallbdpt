@@ -104,12 +104,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <OpenMPSupport>false</OpenMPSupport>
+      <OpenMPSupport>true</OpenMPSupport>
       <AdditionalIncludeDirectories>$(SolutionDir)ext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)ext\lib\Release\tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -152,12 +153,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BDPT.cpp" />
     <ClCompile Include="BSDF.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DebugUtils.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Integrator.cpp" />
@@ -177,6 +180,7 @@
     <ClInclude Include="BSDF.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraV2.h" />
+    <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Integrator.h" />
