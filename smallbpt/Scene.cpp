@@ -108,7 +108,6 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 			pShape = shapes[i];
 		}
 	}
-
 	if (t < Inf) {
 		isect->mPos = r.o + t * r.d;
 		isect->mSurfaceNormal = pShape->GetNormal(isect->mPos);

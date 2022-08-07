@@ -87,7 +87,7 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 		real pdfLight;
 		real pdfA, pdfW;
 		Intersection lightPoint;
-		pLight = scene.SampleOneLight(&pdfLight, rand());
+		pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
 		Vec3 Le = pLight->Sample(&lightPoint, &pdfA, sampler.Get3D());
 		Vec3 hitToLight = lightPoint.mPos - isect.mPos;
 		real dis = hitToLight.Length();
