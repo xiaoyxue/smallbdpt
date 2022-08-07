@@ -4,7 +4,6 @@
 #include "Sampler.h"
 #include "Scene.h"
 #include "VisibilityTester.h"
-#include "DebugUtils.h"
 
 Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, Sampler& sampler)
 {
@@ -23,7 +22,6 @@ Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, 
 		real cosTheta1 = (-1 * hitToLight).Dot(lightPoint.mNormal);
 		pdfW = pdfA * dis * dis / std::abs(cosTheta1);
 		Vec3 f = hitPoint.mpBSDF->f(hitPoint.mOutDir, hitToLight);
-		//VisibilityTester visibilityTester(hitPoint, lightPoint);
 		Ray shadowRay(hitPoint.mPos, hitToLight);
 		Intersection hit;
 		if (scene.Intersect(shadowRay, &hit) && cosTheta1 > 0) {
@@ -31,7 +29,6 @@ Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, 
 				L = Le * f * cosTheta0 / pdfW / pdfLight;
 			}
 		}
-
 	}
 	return L;
 }

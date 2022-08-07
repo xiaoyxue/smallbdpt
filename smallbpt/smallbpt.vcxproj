@@ -160,7 +160,6 @@
     <ClCompile Include="BDPT.cpp" />
     <ClCompile Include="BSDF.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DebugUtils.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Integrator.cpp" />
@@ -180,7 +179,6 @@
     <ClInclude Include="BSDF.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraV2.h" />
-    <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Integrator.h" />
