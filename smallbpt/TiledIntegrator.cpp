@@ -29,10 +29,11 @@ void TiledIntegrator::Render(const Scene& scene, const Camera& camera) {
 		Sampler* pSampler = mpSampler->Clone(i);
 		for (int y = tile.minY; y < tile.maxY; ++y) {
 			for (int x = tile.minX; x < tile.maxX; ++x) {
+				Vec3 L(0, 0, 0);
 				for (int spp = 0; spp < mSpp; ++spp) {
 					Vec2 pixelSample = pSampler->Get2D();
 					Ray ray = camera.GenerateRay(x, y, pixelSample, 0);
-					Vec3 L = Li(ray, scene, *pSampler);
+					L += Li(ray, scene, *pSampler) / mSpp;
 					pFilm->AddSample(Vec3(x + pixelSample.x, y + pixelSample.y, 0), L );
 				}
 			}

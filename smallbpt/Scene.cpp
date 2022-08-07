@@ -100,7 +100,7 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 	Shape* pShape = nullptr;
 	for (int i = 0; i < shapes.size(); i++) {
 		Intersection isection;
-		double tt;
+		double tt = 0;
 		shapes[i]->Intersect(r, &isection, &tt);
 		if (tt > 0  && t > tt) {
 			t = tt;

@@ -81,31 +81,6 @@ Vec3 AreaLight::SampleFromLight(Intersection* lightPoint, Vec3* dir, double* pdf
 
 Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const Intersection& isect, const Vec3& throughput, PathVertex* sampled /*= 0*/) const
 {
-	//Vec3 L;
-	//double pdfA, pdfW;
-	//Intersection lightPoint = mpShape->Sample(&pdfA, sampler.Get3D());
-	//Vec3 wi = (lightPoint.mPos - isect.mPos);
-	//double dis = wi.Length();
-	//double dis2 = dis * dis;
-	//wi = wi.Norm();
-	//pdfW = pdfA * dis2 / std::abs(lightPoint.mNormal.Dot(-1 * wi));
-	//Vec3 f = isect.mpBSDF->f(isect.mOutDir, wi);
-	//Ray shadowRay(isect.mPos, wi);
-	//Intersection isection;
-	//scene.Intersect(shadowRay, &isection);
-	//if (!isection.IsLight) {
-	//	return Vec3();
-	//}
-	//else {
-	//	L = throughput * f * std::abs(wi.Dot(isect.mNormal)) * Emission() / pdfW;
-	//}
-
-	//if (sampled) {
-	//	sampled->mThroughput = mpShape->Emission() / pdfW;
-	//	sampled->mIsect.mPos = lightPoint.mPos;
-	//	sampled->mIsect.mNormal = lightPoint.mPos;
-	//}
-
 	Vec3 L(0, 0, 0);
 	if (!isect.mIsDelta) {
 		Light* pLight;

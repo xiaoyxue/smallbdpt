@@ -41,7 +41,7 @@ void SceneOne() {
 void SceneTwo() {
 	int width = 1024, height = 1024;
 
-	std::string filename = "Result/Image28.png";
+	std::string filename = "Result/Image34.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(0, 0, 3), d(0, 0, -1);
@@ -62,8 +62,7 @@ void SceneTwo() {
 	//BidirectionalPathTracing bpt(&sampler, 15, 32, false, false);
 	//bpt.Render(scene, camera);
 
-
-	PathTracing pt(&sampler, 1, 2);
+	PathTracing pt(&sampler, 32, 2);
 	pt.Render(scene, camera);
 
 }
