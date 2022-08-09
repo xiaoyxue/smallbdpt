@@ -7,8 +7,8 @@
 class Light;
 class Scene {
 public:
-	//static int numSpheres;
-	//static Sphere spheres[];
+	static int numSpheres;
+	static Sphere spheres[];
 
 	static std::vector<Shape*> shapes;
 	static std::vector<Light*> lights;

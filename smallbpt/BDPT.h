@@ -13,7 +13,7 @@
 class BidirectionalPathTracing : public Integrator {
 public:
 	BidirectionalPathTracing() {}
-	BidirectionalPathTracing(Sampler *pSampler,int maxDepth, int spp, bool visualizeStrategies, bool visualizeWeight) :
+	BidirectionalPathTracing(Sampler *pSampler, int spp, int maxDepth, bool visualizeStrategies, bool visualizeWeight) :
 		mpSampler(pSampler), mMaxDepth(maxDepth), mSpp(spp),
 		mVisualizeStrategies(visualizeStrategies), mVisualizeWeight(visualizeWeight){}
 	void Render(const Scene &scene, const Camera& camera);

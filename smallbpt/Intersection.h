@@ -6,6 +6,7 @@
 #include "Smallbpt.h"
 
 class BSDF;
+class Light;
 class Intersection {
 public:
 	Intersection() {

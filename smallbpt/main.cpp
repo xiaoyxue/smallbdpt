@@ -11,9 +11,9 @@
 
 
 void SceneOne() {
-	int width = 1024, height = 768;
+	int width = 1024 , height = 768;
 
-	std::string filename = "Result/Image46.png";
+	std::string filename = "Result/Sphere3.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(50, 52, 295.6), d(0, -0.042612, -1);
@@ -30,10 +30,10 @@ void SceneOne() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render(scene, camera);
 
-	BidirectionalPathTracing bpt(&sampler, 10, 16, false, false);
+	BidirectionalPathTracing bpt(&sampler, 15, 32, false, false);
 	bpt.Render(scene, camera);
 
-	//PathTracing pt(&sampler, 12, 32);
+	//PathTracing pt(&sampler, 128, 15);
 	//pt.Render(scene, camera);
 }
 
@@ -41,7 +41,7 @@ void SceneOne() {
 void SceneTwo() {
 	int width = 1024, height = 1024;
 
-	std::string filename = "Result/Image48.png";
+	std::string filename = "Result/BDPT_test9.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(0, 0, 3), d(0, 0, -1);
@@ -59,10 +59,10 @@ void SceneTwo() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render(scene, camera);
 
-	BidirectionalPathTracing bpt(&sampler, 1, 1, false, false);
+	BidirectionalPathTracing bpt(&sampler, 32, 30, false, false);
 	bpt.Render(scene, camera);
 
-	//PathTracing pt(&sampler, 128, 5);
+	//PathTracing pt(&sampler, 32, 10);
 	//pt.Render(scene, camera);
 
 }
@@ -70,8 +70,8 @@ void SceneTwo() {
 
 int main() {
 	
-	//SceneOne();
-	SceneTwo();
+	SceneOne();
+	//SceneTwo();
 	
 	return 0;
 }
