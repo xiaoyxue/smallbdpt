@@ -14,6 +14,8 @@ public:
 		mIsDelta = false;
 	}
 
+	Intersection(const Vec3 o, double time) : mPos(o), mTime(time) {}
+
 	Ray SpawnRay(const Vec3& d) const {
 		return Ray(mPos + d * RayEps, d);
 	}
@@ -30,8 +32,9 @@ public:
 	Vec3 mOutDir;
 	bool mIsDelta;
 	bool IsLight;
-	Shape* pLight;
+	std::shared_ptr<Light> pLight;
 	double b1, b2;
+	double mTime;
 	std::shared_ptr<BSDF> mpBSDF;
 
 };

@@ -12,7 +12,9 @@ class Camera {
 public:
 	Camera() {}
 	void SetCamera(const Vec3 &_o, const Vec3 &_d, const Vec3 &_u, const Vec3 &_v, double _dis = 1.0f, double flov = 40.0f);
+
 	void Init();
+
 	int GenerateCameraRay(const CameraSample &sample, Ray &ray);
 	Vec3 We(const Ray &ray) const {
 		double PdfA = 1.0; // for the pinhole camera
@@ -87,6 +89,12 @@ public:
 		Vec3 d = (p - o).Norm();
 		Ray cameraRay(o, d);
 		return cameraRay;
+	}
+
+	void PdfWe(const Ray& ray, double* pdfPos, double* pdfDir) const {
+		double lensArea = 1.0;
+		*pdfPos = PdfPos();
+		*pdfDir = PdfDir(ray);
 	}
 
 	Film* GetFilm() const  {

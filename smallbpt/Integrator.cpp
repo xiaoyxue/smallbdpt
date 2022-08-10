@@ -9,11 +9,10 @@ Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, 
 {
 	Vec3 L(0, 0, 0);
 	if (!hitPoint.mIsDelta) {
-		Light* pLight;
 		real pdfLight;
 		real pdfA, pdfW;
 		Intersection lightPoint;
-		pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
+		std::shared_ptr<Light> pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
 		Vec3 Le = pLight->Sample(&lightPoint, &pdfA, sampler.Get3D());
 		Vec3 hitToLight = lightPoint.mPos - hitPoint.mPos;
 		real dis = hitToLight.Length();

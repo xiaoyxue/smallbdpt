@@ -9,6 +9,8 @@
 #include "Geometry.h"
 #include "PathVertex.h"
 #include "ScopedAssignment.h"
+#include "BSDF.h"
+
 
 class BidirectionalPathTracing : public Integrator {
 public:
@@ -47,7 +49,8 @@ int Trace(
 	Sampler						&sampler,
 	std::vector<PathVertex>		&path, 
 	int							depth, 
-	int							maxDepth);
+	int							maxDepth,
+	TransportMode				mode);
 
 Vec3 ConnectBDPT(
 	const Scene					&scene, 
@@ -76,8 +79,6 @@ bool IsConnectable(
 	const Vec3					&pointB);
 
 double MISWeight(
-	const Scene					&scene,
-	Sampler						&sampler,
 	std::vector<PathVertex>		&lightPath, 
 	std::vector<PathVertex>		&cameraPath,
 	int							s, 
@@ -85,18 +86,26 @@ double MISWeight(
 	PathVertex					&sampled);
 
 double MISWeight2(
-	const Scene					&scene,
-	Sampler						&sampler,
 	std::vector<PathVertex>		&lightPath, 
 	std::vector<PathVertex>		&cameraPath,
 	int							s, 
-	int							t, 
+	int							t,
 	PathVertex					&sampled);
 
 double Path_Pdf(
-	const Scene						&scene,
-	Sampler							&sampler,
 	const std::vector<PathVertex>	&path, 
 	int								s, 
 	int								t);
+
+double MISWeight3(
+	const Scene& scene,
+	const Camera& camera,
+	Sampler& sampler,
+	std::vector<PathVertex>& lightPath,
+	std::vector<PathVertex>& cameraPath,
+	int							s,
+	int							t,
+	const double				GConnect,
+	std::vector<BDPTMISNode>& misNode);
+
 #endif

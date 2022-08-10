@@ -83,11 +83,11 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 {
 	Vec3 L(0, 0, 0);
 	if (!isect.mIsDelta) {
-		Light* pLight;
+
 		real pdfLight;
 		real pdfA, pdfW;
 		Intersection lightPoint;
-		pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
+		std::shared_ptr<Light> pLight = scene.SampleOneLight(&pdfLight, sampler.Get1D());
 		Vec3 Le = pLight->Sample(&lightPoint, &pdfA, sampler.Get3D());
 		Vec3 hitToLight = lightPoint.mPos - isect.mPos;
 		real dis = hitToLight.Length();
@@ -111,4 +111,11 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 	}
 	return L;
 
+}
+
+void AreaLight::PdfLe(const Ray& ray, const Vec3& n, double* pdfPos, double* pdfDir) const
+{
+	Intersection it(ray.o, ray.time);
+	*pdfPos = mpShape->Pdf(it);
+	*pdfDir = CosineHemispherePdf(std::abs(n.Dot(ray.d)));
 }

@@ -26,20 +26,20 @@ int Scene::numSpheres = sizeof(spheres) / sizeof(Sphere);
 
 //*****************************************Sphere scene*****************************************
 
- std::vector<Shape*> Scene::shapes = {
- 	new Sphere(1e5, Vec3(1e5 + 1,40.8,81.6), Vec3(),Vec3(.75,.25,.25),DIFF),//Left
- 	new Sphere(1e5, Vec3(-1e5 + 99,40.8,81.6),Vec3(),Vec3(.25,.25,.75),DIFF),//Right
- 	new Sphere(1e5, Vec3(50,40.8, 1e5),     Vec3(),Vec3(.75,.75,.75),DIFF),//Back
- 	new Sphere(1e5, Vec3(50, 1e5, 81.6),    Vec3(),Vec3(.75,.75,.75),DIFF),//Bottom
- 	new Sphere(1e5, Vec3(50,-1e5 + 81.6,81.6),Vec3(),Vec3(.75,.75,.75),DIFF),//Top
- 	new Sphere(16.5,Vec3(27,16.5,47),       Vec3(),Vec3(1,1,1) * .999, SPEC),//Mirror
- 	new Sphere(16.5,Vec3(73,16.5,78),       Vec3(),Vec3(1,1,1) * .999, REFR),//Glass
- 	new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF),//Lite
- };
+ // std::vector<std::shared_ptr<Shape>> Scene::shapes = {
+ // 	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(1e5 + 1,40.8,81.6), Vec3(),Vec3(.75,.25,.25),DIFF)),//Left
+	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(-1e5 + 99,40.8,81.6),Vec3(),Vec3(.25,.25,.75),DIFF)),//Right
+	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50,40.8, 1e5),     Vec3(),Vec3(.75,.75,.75),DIFF)),//Back
+	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50, 1e5, 81.6),    Vec3(),Vec3(.75,.75,.75),DIFF)),//Bottom
+	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50,-1e5 + 81.6,81.6),Vec3(),Vec3(.75,.75,.75),DIFF)),//Top
+	//std::shared_ptr<Sphere>(new Sphere(16.5,Vec3(27,16.5,47),       Vec3(),Vec3(1,1,1) * .999, SPEC)),//Mirror
+	//std::shared_ptr<Sphere>(new Sphere(16.5,Vec3(73,16.5,78),       Vec3(),Vec3(1,1,1) * .999, REFR)),//Glass
+	//std::shared_ptr<Sphere>(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF)),//Lite
+ // };
 
- std::vector<Light*> Scene::lights = {
- 	new SphereLight(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF))
- };
+ // std::vector<std::shared_ptr<Light>> Scene::lights = {
+ // 	std::shared_ptr<SphereLight>(new SphereLight(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF)))
+ // };
 
 //*****************************************Triangle scene*****************************************
 Vec3 p0(-1, -1, 1);
@@ -63,38 +63,38 @@ Vec3 lightP1 = Vec3(0.25f, 0.965f, -0.25f);
 Vec3 lightP2 = Vec3(-0.25f, 0.965f, -0.25f);
 Vec3 lightP3 = Vec3(-0.25f, 0.965f, 0.25f);
 
-// std::vector<Shape*> Scene::shapes = {
-// 	//left
-// 	new Triangle(p0, p1, p2, normalLeft, Vec3(.75f, .25f, .25f), Vec3(), DIFF),
-// 	new Triangle(p2, p3, p0, normalLeft, Vec3(.75f, .25f, .25f), Vec3(), DIFF),
+std::vector<std::shared_ptr<Shape>> Scene::shapes = {
+	//left
+	std::shared_ptr<Triangle>(new Triangle(p0, p1, p2, normalLeft, Vec3(.75f, .25f, .25f), Vec3(), DIFF)),
+	std::shared_ptr<Triangle>(new Triangle(p2, p3, p0, normalLeft, Vec3(.75f, .25f, .25f), Vec3(), DIFF)),
 
-// 	 //right
-// 	 new Triangle(p4, p5, p6, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF),
-// 	 new Triangle(p4, p6, p7, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF),
+	 //right
+	std::shared_ptr<Triangle>(new Triangle(p4, p5, p6, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF)),
+	std::shared_ptr<Triangle>(new Triangle(p4, p6, p7, normalRight, Vec3(.25f, .25f, .75f), Vec3(), DIFF)),
 
-// 	 //back
-// 	 new Triangle(p1, p5, p6, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
-// 	 new Triangle(p1, p6, p2, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+	 //back
+	std::shared_ptr<Triangle>(new Triangle(p1, p5, p6, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF)),
+	std::shared_ptr<Triangle>(new Triangle(p1, p6, p2, normalBack, Vec3(.75f, .75f, .75f), Vec3(), DIFF)),
 
-// 	 //bottom
-// 	 new Triangle(p0, p4, p5, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
-// 	 new Triangle(p0, p5, p1, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+	 //bottom
+	std::shared_ptr<Triangle>(new Triangle(p0, p4, p5, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF)),
+	std::shared_ptr<Triangle>(new Triangle(p0, p5, p1, normalBottom, Vec3(.75f, .75f, .75f), Vec3(), DIFF)),
 
-// 	 //top
-// 	 new Triangle(p3, p7, p6, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
-// 	 new Triangle(p3, p6, p2, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF),
+	 //top
+	std::shared_ptr<Triangle>(new Triangle(p3, p7, p6, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF)),
+	std::shared_ptr<Triangle>(new Triangle(p3, p6, p2, normalTop, Vec3(.75f, .75f, .75f), Vec3(), DIFF)),
 
-// 	 //light
-// 	 new Triangle(lightP0, lightP1, lightP2, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF),
-// 	 new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF),
+	 //light
+	std::shared_ptr<Triangle>(new Triangle(lightP0, lightP1, lightP2, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF)),
+	std::shared_ptr<Triangle>(new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF)),
 
-// 	 new Sphere(0.3, Vec3(0.5, -0.7, 0.5), Vec3(),Vec3(1,1,1) * .999, REFR)
-// };
+	std::shared_ptr<Sphere>(new Sphere(0.3, Vec3(0.5, -0.7, 0.5), Vec3(),Vec3(1,1,1) * .999, REFR))
+};
 
-// std::vector<Light*> Scene::lights = {
-// 	new AreaLight(new Triangle(lightP0, lightP1, lightP2, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF)),
-// 	new AreaLight(new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF))
-// };
+std::vector<std::shared_ptr<Light>> Scene::lights = {
+	std::shared_ptr<AreaLight>(new AreaLight(new Triangle(lightP0, lightP1, lightP2, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF))),
+	std::shared_ptr<AreaLight>(new AreaLight(new Triangle(lightP0, lightP2, lightP3, lightNormal, Vec3(), Vec3(0.3f, 0.3f, 0.3f) * 85, DIFF)))
+};
 
 bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 
@@ -107,7 +107,7 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 		if (tt > 0  && t > tt) {
 			t = tt;
 			*isect = isection;
-			pShape = shapes[i];
+			pShape = shapes[i].get();
 		}
 	}
 	if (t < Inf) {
@@ -127,7 +127,7 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 		isect->mIsDelta = isect->mpBSDF->IsDelta();
 		isect->IsLight = (pShape->Emission() != Vec3());
 		if (isect->IsLight) {
-			isect->pLight = pShape;
+			isect->pLight = std::make_shared<AreaLight>(pShape);
 		}
 	}
 	return t < Inf;
@@ -146,7 +146,7 @@ bool Scene::Intersect(const Ray& r) const {
 	return t > r.tmin && t < r.tmax;
 }
 
-Light* Scene::SampleOneLight(double* pdfLight, double u) const
+std::shared_ptr<Light> Scene::SampleOneLight(double* pdfLight, double u) const
 {
 	int lightCount = lights.size();
 	int index = std::min(int(lightCount * u), lightCount - 1);

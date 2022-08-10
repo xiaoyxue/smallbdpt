@@ -10,12 +10,12 @@ public:
 	static int numSpheres;
 	static Sphere spheres[];
 
-	static std::vector<Shape*> shapes;
-	static std::vector<Light*> lights;
+	static std::vector<std::shared_ptr<Shape>> shapes;
+	static std::vector<std::shared_ptr<Light>> lights;
 
 	bool Intersect(const Ray& r, Intersection* isect) const;
 	bool Intersect(const Ray& r) const;
-	Light* SampleOneLight(double* pdfLight, double u) const;
+	std::shared_ptr<Light> SampleOneLight(double* pdfLight, double u) const;
 };
 
 

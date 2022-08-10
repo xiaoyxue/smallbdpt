@@ -8,6 +8,8 @@
 #include <algorithm>
 #include "Utils.h"
 
+enum class TransportMode { Radiance = 1, Importance };
+
 inline double CosTheta(const Vec3 &wo) {
 	return std::abs(wo.z);
 }
@@ -30,7 +32,7 @@ public:
 	BSDF(Vec3 norm, Vec3 surfacenorm) : ns(norm), surfaceNormal(surfacenorm){
 		CoordinateSystem(ns, &ss, &ts);
 	}
-	virtual Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const = 0;
+	virtual Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode = TransportMode::Radiance) const = 0;
 	virtual double Pdf(const Vec3 &wo, const Vec3 &wi) const = 0;
 	virtual Vec3 f(const Vec3 &wo, const Vec3 &wi) const = 0;
 	virtual bool IsDelta() { return false; }
@@ -52,7 +54,7 @@ class LambertianBSDF : public BSDF {
 public:
 	LambertianBSDF(){}
 	LambertianBSDF(Vec3 normal, Vec3 surfacenorm, Vec3 r) : BSDF(normal, surfacenorm), R(r) {}
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode = TransportMode::Radiance) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		Vec3 wiLocal = CosineSampleHemisphere(u);
 		//*pdf = PdfInner(woLocal, wiLocal);
@@ -125,7 +127,7 @@ private:
 class SpecularReflection : public BSDF {
 public:
 	SpecularReflection(Vec3 normal, Vec3 surfacenorm, Vec3 r) : BSDF(normal, surfacenorm), R(r) {}
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode = TransportMode::Radiance) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		Vec3 wiLocal(-1 * woLocal.x, -1 * woLocal.y, woLocal.z);
 		*wi = this->LocalToWorld(wiLocal);
@@ -143,10 +145,10 @@ private:
 
 class SpecularTransmission : public BSDF {
 public:
-	SpecularTransmission(Vec3 normal, Vec3 surfacenorm, Vec3 t, double _eta0 = 1.0, double _eta1 = 1.5) :
-		BSDF(normal, surfacenorm), T(t), eta0(_eta0), eta1(_eta1), fresnel(_eta0, _eta1){}
+	SpecularTransmission(Vec3 normal, Vec3 surfacenorm, Vec3 t, double _eta0 = 1.0, double _eta1 = 1.5, TransportMode mode = TransportMode::Radiance) :
+		BSDF(normal, surfacenorm), T(t), eta0(_eta0), eta1(_eta1), fresnel(_eta0, _eta1) {}
 
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u) const override {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		double cosTheta = CosTheta(woLocal);
 		double entering = ns.Dot(surfaceNormal) > 0;
@@ -179,7 +181,13 @@ public:
 			else {
 				*pdf = 1.0 * (1 - prob);
 				*wi = this->LocalToWorld(wiLocal);
-				return (1 - fresnelreflect) * T * (etaI * etaI) / (etaT * etaT) / std::abs(CosTheta(wiLocal));
+				if (mode == TransportMode::Radiance){
+					return (1 - fresnelreflect) * T * (etaI * etaI) / (etaT * etaT) / std::abs(CosTheta(wiLocal));
+
+				}
+				else {
+					return T * (1 - fresnelreflect) / std::abs(CosTheta(wiLocal));
+				}
 			}
 		}
 		return Vec3(0.0, 0.0, 0.0);

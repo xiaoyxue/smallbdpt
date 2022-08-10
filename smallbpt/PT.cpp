@@ -16,7 +16,7 @@ Vec3 PathTracing::Li(const Ray& r, const Scene& scene, Sampler& sampler) const
 		std::shared_ptr<BSDF> pBSDF = isect.mpBSDF;
 
 		if ((i == 0 || deltaBoundEvent) && isect.IsLight) {
-			Shape* pLight = isect.pLight;
+			Shape* pLight = isect.pLight->GetShape();
 			L += throughput * pLight->Emission();
 		}
 		else {

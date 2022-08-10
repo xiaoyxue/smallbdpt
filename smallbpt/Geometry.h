@@ -17,9 +17,13 @@ public:
 	Vec3 HitPoint(double t) const {
 		return o + d * t;
 	}
+
+	Vec3 operator()(double t) const { return o + d * t; }
+
 public:
 	Vec3 o, d;
 	double tmin, tmax;
+	double time;
 };
 
 enum Refl_t { DIFF, SPEC, REFR };  // material types, used in radiance()
@@ -34,7 +38,7 @@ public:
 	virtual Refl_t ReflectType() const = 0;
 	virtual Vec3 Color() const = 0;
 	virtual Vec3 GetNormal(const Vec3& point) const = 0;
-
+	virtual double Pdf(const Intersection&) { return 1.0 / Area(); }
 	virtual bool Intersect(const Ray& r, Intersection* isect, double* t) const = 0;
 	virtual bool Intersect(const Ray& r) const = 0;
 

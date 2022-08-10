@@ -13,6 +13,7 @@ public:
 	virtual Vec3 Emission() const = 0;
 	virtual Shape* GetShape() const = 0;
 	virtual Vec3 DirectIllumination(const Scene& scene, Sampler& sampler, const Intersection& isect, const Vec3 &throughput, PathVertex *sampled = 0) const = 0;
+	virtual void PdfLe(const Ray& ray, const Vec3& n, double* pdfPos, double* pdfDir) const = 0;
 };
 
 
@@ -33,6 +34,8 @@ public:
 	Vec3 SampleFromLight(Intersection* lightPoint, Vec3* dir, double* pdfPos, double* pdfDir, double* cosTheta, Sampler& sampler) const override;
 
 	Vec3 DirectIllumination(const Scene& scene, Sampler& sampler, const Intersection& isect, const Vec3& throughput, PathVertex* sampled = 0) const override;
+
+	void PdfLe(const Ray& ray, const Vec3& n, double* pdfPos, double* pdfDir) const override;
 private:
 	Shape* mpShape;
 };
