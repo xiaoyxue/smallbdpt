@@ -13,7 +13,7 @@
 void SceneOne() {
 	int width = 1024 , height = 768;
 
-	std::string filename = "Result/Sphere3.png";
+	std::string filename = "Result/Sphere6.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(50, 52, 295.6), d(0, -0.042612, -1);
@@ -38,10 +38,10 @@ void SceneOne() {
 }
 
 
-void SceneTwo() {
+void SceneBDPT() {
 	int width = 1024, height = 1024;
 
-	std::string filename = "Result/BDPT_test16.png";
+	std::string filename = "Result/BDPT_test3.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(0, 0, 3), d(0, 0, -1);
@@ -59,19 +59,49 @@ void SceneTwo() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render(scene, camera);
 
-	BidirectionalPathTracing bpt(&sampler, 32, 15, false, false);
+	BidirectionalPathTracing bpt(&sampler, 512, 15, false, false);
 	bpt.Render(scene, camera);
 
-	//PathTracing pt(&sampler, 32, 10);
+	//PathTracing pt(&sampler, 128, 15);
 	//pt.Render(scene, camera);
+	std::cout << std::endl;
 
 }
 
+void ScenePT() {
+	int width = 1024, height = 1024;
+
+	std::string filename = "Result/PT_test3.png";
+	Film film(width, height, filename);
+	Camera camera;
+	Vec3 camPos(0, 0, 3), d(0, 0, -1);
+	d.Norm();
+	Vec3 u = Vec3(1, 0, 0);
+	Vec3 v = Vec3(0, 1, 0);
+	double fovy = 53.13010235415597;
+	double filmDis = 1;
+	camera.SetCamera(camPos, d, u, v, filmDis, fovy);
+	camera.film = &film;
+	camera.Init();
+	Sampler sampler;
+	Scene scene;
+
+	//LightTracing lt(&sampler, &camera, 8, 32);
+	//lt.Render(scene, camera);
+
+	//BidirectionalPathTracing bpt(&sampler, 128, 15, false, false);
+	//bpt.Render(scene, camera);
+
+	PathTracing pt(&sampler, 512, 15);
+	pt.Render(scene, camera);
+
+	std::cout << std::endl;
+}
 
 int main() {
 	
-	//SceneOne();
-	SceneTwo();
+	SceneBDPT();
+	ScenePT();
 	
 	return 0;
 }

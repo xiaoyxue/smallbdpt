@@ -26,20 +26,20 @@ int Scene::numSpheres = sizeof(spheres) / sizeof(Sphere);
 
 //*****************************************Sphere scene*****************************************
 
- // std::vector<std::shared_ptr<Shape>> Scene::shapes = {
- // 	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(1e5 + 1,40.8,81.6), Vec3(),Vec3(.75,.25,.25),DIFF)),//Left
-	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(-1e5 + 99,40.8,81.6),Vec3(),Vec3(.25,.25,.75),DIFF)),//Right
-	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50,40.8, 1e5),     Vec3(),Vec3(.75,.75,.75),DIFF)),//Back
-	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50, 1e5, 81.6),    Vec3(),Vec3(.75,.75,.75),DIFF)),//Bottom
-	//std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50,-1e5 + 81.6,81.6),Vec3(),Vec3(.75,.75,.75),DIFF)),//Top
-	//std::shared_ptr<Sphere>(new Sphere(16.5,Vec3(27,16.5,47),       Vec3(),Vec3(1,1,1) * .999, SPEC)),//Mirror
-	//std::shared_ptr<Sphere>(new Sphere(16.5,Vec3(73,16.5,78),       Vec3(),Vec3(1,1,1) * .999, REFR)),//Glass
-	//std::shared_ptr<Sphere>(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF)),//Lite
- // };
+//  std::vector<std::shared_ptr<Shape>> Scene::shapes = {
+//  	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(1e5 + 1,40.8,81.6), Vec3(),Vec3(.75,.25,.25),DIFF)),//Left
+// 	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(-1e5 + 99,40.8,81.6),Vec3(),Vec3(.25,.25,.75),DIFF)),//Right
+// 	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50,40.8, 1e5),     Vec3(),Vec3(.75,.75,.75),DIFF)),//Back
+// 	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50, 1e5, 81.6),    Vec3(),Vec3(.75,.75,.75),DIFF)),//Bottom
+// 	std::shared_ptr<Sphere>(new Sphere(1e5, Vec3(50,-1e5 + 81.6,81.6),Vec3(),Vec3(.75,.75,.75),DIFF)),//Top
+// 	std::shared_ptr<Sphere>(new Sphere(16.5,Vec3(27,16.5,47),       Vec3(),Vec3(1,1,1) * .999, SPEC)),//Mirror
+// 	std::shared_ptr<Sphere>(new Sphere(16.5,Vec3(73,16.5,78),       Vec3(),Vec3(1,1,1) * .999, REFR)),//Glass
+// 	std::shared_ptr<Sphere>(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF)),//Lite
+//  };
 
- // std::vector<std::shared_ptr<Light>> Scene::lights = {
- // 	std::shared_ptr<SphereLight>(new SphereLight(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF)))
- // };
+//  std::vector<std::shared_ptr<Light>> Scene::lights = {
+//  	std::shared_ptr<SphereLight>(new SphereLight(new Sphere(8.0, Vec3(50,81.6 - 16.5,81.6),Vec3(0.30,0.30,0.30) * 100,  Vec3(), DIFF)))
+//  };
 
 //*****************************************Triangle scene*****************************************
 Vec3 p0(-1, -1, 1);

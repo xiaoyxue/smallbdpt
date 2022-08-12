@@ -34,6 +34,10 @@ void Camera::Init() {
 
 
 	film->Area = (film->LL - film->LU).Length() * (film->RU - film->LU).Length();
+
+	tanHalfFov = std::tan(fovy / 2);
+
+	aspectRatio = film->aspect;
 }
 
 int Camera::GenerateCameraRay(const CameraSample &sample, Ray &ray) {

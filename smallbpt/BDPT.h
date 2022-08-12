@@ -79,6 +79,8 @@ bool IsConnectable(
 	const Vec3					&pointB);
 
 double MISWeight(
+	const Scene					&scene,
+	Sampler						&sampler,
 	std::vector<PathVertex>		&lightPath, 
 	std::vector<PathVertex>		&cameraPath,
 	int							s, 
@@ -97,15 +99,16 @@ double Path_Pdf(
 	int								s, 
 	int								t);
 
-double MISWeight3(
-	const Scene& scene,
+double Path_Pdf(
 	const Camera& camera,
-	Sampler& sampler,
-	std::vector<PathVertex>& lightPath,
-	std::vector<PathVertex>& cameraPath,
-	int							s,
-	int							t,
-	const double				GConnect,
-	std::vector<BDPTMISNode>& misNode);
+	const std::vector<PathVertex>& path,
+	const int s,
+	const int t);
+
+double MISWeight3(const Camera& camera, std::vector<PathVertex>& lightPath, std::vector<PathVertex>& cameraPath, int s, int t);
+
+double DirectionToArea(const PathVertex& current, const PathVertex& next);
+
+double Path_Total_Pdf(const Camera& camera, const std::vector<PathVertex>& path);
 
 #endif

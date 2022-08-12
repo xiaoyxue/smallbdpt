@@ -106,7 +106,8 @@ Vec3 AreaLight::DirectIllumination(const Scene& scene, Sampler& sampler, const I
 		if (sampled) {
 			sampled->mThroughput = mpShape->Emission() / pdfW;
 			sampled->mIsect.mPos = isect.mPos;
-			sampled->mIsect.mNormal = isect.mPos;
+			sampled->mIsect.mNormal = isect.mNormal;
+			sampled->mPdfForward = pdfA * pdfLight;
 		}
 	}
 	return L;

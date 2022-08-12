@@ -60,6 +60,8 @@ public:
 
 	Vec3 DirectIllumination(const Scene& scene, Sampler& sampler, const Intersection& isect, const Vec3 &throughput, PathVertex *sampled = 0) const override;
 
+	void PdfLe(const Ray& ray, const Vec3& n, double* pdfPos, double* pdfDir) const override {}
+
 private:
 	Sphere* mpSphere;
 };

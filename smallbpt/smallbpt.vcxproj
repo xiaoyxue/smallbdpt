@@ -178,7 +178,6 @@
     <ClInclude Include="BDPT.h" />
     <ClInclude Include="BSDF.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="CameraV2.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Integrator.h" />

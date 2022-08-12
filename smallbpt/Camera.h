@@ -16,6 +16,8 @@ public:
 	void Init();
 
 	int GenerateCameraRay(const CameraSample &sample, Ray &ray);
+
+
 	Vec3 We(const Ray &ray) const {
 		double PdfA = 1.0; // for the pinhole camera
 		double A = film->Area;
@@ -101,12 +103,18 @@ public:
 		return film;
 	}
 
+	double GetPixelScaling() const {
+		return sqrt(tanHalfFov) * aspectRatio;
+	}
+
 public:
 	Film *film;
 	Vec3 o, d;
 private:
 	Vec3 u, v;
 	double dis, fovy;
+	double tanHalfFov;
+	double aspectRatio;
 	
 };
 
