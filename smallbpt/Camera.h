@@ -5,7 +5,9 @@
 #include "Intersection.h"
 
 struct CameraSample {
-	Vec3 filmPoint;
+	Vec2 pFilm;
+	Vec2 pLens;
+	double time;
 };
 
 class Camera {
@@ -15,7 +17,7 @@ public:
 
 	void Init();
 
-	int GenerateCameraRay(const CameraSample &sample, Ray &ray);
+	int GenerateCameraRay(const CameraSample &sample, Ray &ray) const;
 
 
 	Vec3 We(const Ray &ray) const {
@@ -27,7 +29,7 @@ public:
 		return Vec3(Value, Value, Value);
 	}
 
-	Vec3 Sample_Wi(const Intersection &isect, double *PdfW, Vec3 *wi) const {
+	Vec3 Sample_Wi(const Intersection &isect, double *PdfW, Vec3 *wi, const Vec3 &u) const {
 		*wi = (o - isect.mPos);
 		double distance = wi->Length();
 		wi->Normalize();

@@ -125,10 +125,8 @@ bool Scene::Intersect(const Ray &r, Intersection* isect) const {
 		}
 		isect->mOutDir = -1 * r.d;
 		isect->mIsDelta = isect->mpBSDF->IsDelta();
-		isect->IsLight = (pShape->Emission() != Vec3());
-		if (isect->IsLight) {
-			isect->pLight = std::make_shared<AreaLight>(pShape);
-		}
+		isect->mIsLight = (pShape->Emission() != Vec3());
+		isect->pLight = std::make_shared<AreaLight>(pShape);
 	}
 	return t < Inf;
 }

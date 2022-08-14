@@ -147,6 +147,9 @@ struct Vec3 {
 	double Length() const {
 		return std::sqrt(x * x + y * y + z * z);
 	}
+	double Length2() const {
+		return (x * x + y * y + z * z);
+	}
 	inline Vec3 Norm() {
 		return *this = (*this) / Length();
 	}

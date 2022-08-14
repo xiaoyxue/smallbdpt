@@ -1,5 +1,4 @@
-#ifndef INTERSECT_H
-#define INTERSECT_H
+#pragma once
 
 #include "Geometry.h"
 #include "BSDF.h"
@@ -9,10 +8,8 @@ class BSDF;
 class Light;
 class Intersection {
 public:
-	Intersection() {
-		IsLight = false;
-		mIsDelta = false;
-	}
+
+	Intersection() {}
 
 	Intersection(const Vec3 o, double time) : mPos(o), mTime(time) {}
 
@@ -31,12 +28,15 @@ public:
 	Vec3 mSurfaceNormal;
 	Vec3 mOutDir;
 	bool mIsDelta;
-	bool IsLight;
-	std::shared_ptr<Light> pLight;
+	bool mIsLight;
 	double b1, b2;
 	double mTime;
+	std::shared_ptr<Light> pLight;
 	std::shared_ptr<BSDF> mpBSDF;
-
 };
 
-#endif
+class SurfaceIntersection : public Intersection {
+public:
+	Shape* shape;
+};
+

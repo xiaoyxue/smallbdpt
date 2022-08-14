@@ -24,7 +24,7 @@ int GenerateLightPath(const Scene& scene, Sampler &sampler, std::vector<PathVert
 	lightPath[0].mThroughput = Le; // / Pdfdir / Pdfpos * cosTheta;
 	lightPath[0].mPdfForward = pdfPos;
 	lightPath[0].mIsect.mIsDelta = false;
-	lightPath[0].mIsect.IsLight = true;
+	lightPath[0].mIsect.mIsLight = true;
 	lightPath[0].mIsect.pLight = pLight;
 	Vec3 throughput = lightPath[0].mThroughput * cosTheta / pdfPos / pdfDir / pdfLight;
 	return Trace(scene, ray, throughput, pdfDir, sampler, lightPath, 1, maxdepth - 1, TransportMode::Importance);
@@ -65,7 +65,7 @@ int Trace(const Scene &scene, const Ray &ray, Vec3 throughput, double pdfFwd, Sa
 		if (bound >= maxDepth + 1) break;
 
 		Vec3 wo;
-		Vec3 f = isect.mpBSDF->Sample_f(-1 * r.d, &wo, &pdfW, sampler.Get3D(), mode);
+		Vec3 f = isect.mpBSDF->Sample_f(-1 * r.d, &wo, &pdfW, sampler.Get3D(), nullptr);
 		wo.Normalize();
 		throughput = throughput * f * (std::abs(wo.Dot(isect.mNormal))) / pdfW;
 
@@ -327,11 +327,11 @@ double MISWeight2(std::vector<PathVertex>& lightPath, std::vector<PathVertex>& c
 Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std::vector<PathVertex>& lightPath, std::vector<PathVertex>& cameraPath, int s, int t, Vec3* pRaster, bool* inScreen, double* MISRecord) {
 	Vec3 L(0, 0, 0);
 	PathVertex sampled;
-	if (t > 1 && s != 0 && cameraPath[t - 1].mIsect.IsLight) return Vec3(0, 0, 0);
+	if (t > 1 && s != 0 && cameraPath[t - 1].mIsect.mIsLight) return Vec3(0, 0, 0);
 
 	if (s == 0) {
 		const PathVertex& cameraVertex = cameraPath[t - 1];
-		if (cameraVertex.mIsect.IsLight && cameraVertex.mIsect.pLight->GetShape()->GetNormal(cameraVertex.mIsect.mPos).Dot(cameraVertex.mIsect.mOutDir) > 0)
+		if (cameraVertex.mIsect.mIsLight && cameraVertex.mIsect.pLight->GetShape()->GetNormal(cameraVertex.mIsect.mPos).Dot(cameraVertex.mIsect.mOutDir) > 0)
 		{
 			L = cameraVertex.mThroughput * cameraVertex.mIsect.pLight->Emission();
 		}
@@ -366,7 +366,7 @@ Vec3 ConnectBDPT(const Scene& scene, const Camera& camera, Sampler& sampler, std
 			if (*inScreen) {
 				double pdfW;
 				Vec3 wi;
-				Vec3 We = camera.Sample_Wi(lightVertex.mIsect, &pdfW, &wi);
+				Vec3 We = camera.Sample_Wi(lightVertex.mIsect, &pdfW, &wi, sampler.Get3D());
 				Vec3 f = lightVertex.mIsect.mpBSDF->f(lightVertex.mIsect.mOutDir, wi);
 				sampled.mIsect.mPos = camera.o;
 				sampled.mIsect.mNormal = camera.d;

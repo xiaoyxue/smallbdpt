@@ -12,7 +12,6 @@ public:
 
 };
 
-
 Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, Sampler& sampler);
 
 

@@ -24,7 +24,7 @@ Vec3 SimpleDirectIllumination(const Scene& scene, const Intersection& hitPoint, 
 		Ray shadowRay(hitPoint.mPos, hitToLight);
 		Intersection hit;
 		if (scene.Intersect(shadowRay, &hit) && cosTheta1 > 0) {
-			if (hit.IsLight) {
+			if (hit.mIsLight) {
 				L = Le * f * cosTheta0 / pdfW / pdfLight;
 			}
 		}

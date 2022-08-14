@@ -40,8 +40,9 @@ void Camera::Init() {
 	aspectRatio = film->aspect;
 }
 
-int Camera::GenerateCameraRay(const CameraSample &sample, Ray &ray) {
-	Vec3 dir = (sample.filmPoint - o).Norm();
+int Camera::GenerateCameraRay(const CameraSample &sample, Ray &ray) const {
+	Vec3 pFilm = Vec3(sample.pFilm.x, sample.pFilm.y, 0);
+	Vec3 dir = (pFilm - o).Norm();
 	ray.o = o;
 	ray.d = dir;
 	return 1;

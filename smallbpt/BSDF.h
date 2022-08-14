@@ -26,13 +26,22 @@ inline bool Refract(const Vec3 &wi, const Vec3 &normal, double eta, Vec3 *wt) {
 	return true;
 }
 
+enum BxDFType {
+	BSDF_REFLECTION = 1 << 0,
+	BSDF_TRANSMISSION = 1 << 1,
+	BSDF_DIFFUSE = 1 << 2,
+	BSDF_GLOSSY = 1 << 3,
+	BSDF_SPECULAR = 1 << 4,
+	BSDF_ALL = BSDF_DIFFUSE | BSDF_GLOSSY | BSDF_SPECULAR | BSDF_REFLECTION | BSDF_TRANSMISSION,
+};
+
 class BSDF {
 public:
 	BSDF(){}
 	BSDF(Vec3 norm, Vec3 surfacenorm) : ns(norm), surfaceNormal(surfacenorm){
 		CoordinateSystem(ns, &ss, &ts);
 	}
-	virtual Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode = TransportMode::Radiance) const = 0;
+	virtual Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, BxDFType* sampledType) const = 0;
 	virtual double Pdf(const Vec3 &wo, const Vec3 &wi) const = 0;
 	virtual Vec3 f(const Vec3 &wo, const Vec3 &wi) const = 0;
 	virtual bool IsDelta() { return false; }
@@ -48,24 +57,20 @@ public:
 	}
 
 	Vec3 ss, ts, ns, surfaceNormal;
+
+	BxDFType bsdfType = BSDF_ALL;
 };
 
 class LambertianBSDF : public BSDF {
 public:
 	LambertianBSDF(){}
 	LambertianBSDF(Vec3 normal, Vec3 surfacenorm, Vec3 r) : BSDF(normal, surfacenorm), R(r) {}
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode = TransportMode::Radiance) const override {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, BxDFType *sampledType) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		Vec3 wiLocal = CosineSampleHemisphere(u);
 		//*pdf = PdfInner(woLocal, wiLocal);
 		*wi = this->LocalToWorld(wiLocal);
 		*pdf = Pdf(wo, *wi);
-		//double r1 = 2 * PI*u[0], r2 = u[1], r2s = sqrt(r2);
-		//Vec3 w = ns, uu = ((fabs(w.x)>.1 ? Vec3(0, 1) : Vec3(1)) % w).norm(), v = w%uu;
-		//Vec3 d = (uu*cos(r1)*r2s + v*sin(r1)*r2s + w*sqrt(1 - r2)).norm();
-		//*wi = d;
-		//*pdf = d.dot(ns) * INV_PI;
-
 		return f(wo, *wi);
 	}
 	Vec3 f(const Vec3 &wo, const Vec3 &wi) const {
@@ -76,6 +81,7 @@ public:
 		Vec3 wiLocal = this->WorldToLocal(wi);
 		return std::abs(wiLocal.z) * INV_PI;
 	}
+	BxDFType bsdfType = BSDF_DIFFUSE;
 private:
 	const Vec3 R;
 	double PdfInner(const Vec3 &wo, const Vec3 &wi) const {
@@ -127,17 +133,18 @@ private:
 class SpecularReflection : public BSDF {
 public:
 	SpecularReflection(Vec3 normal, Vec3 surfacenorm, Vec3 r) : BSDF(normal, surfacenorm), R(r) {}
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode = TransportMode::Radiance) const override {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, BxDFType* sampledType) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		Vec3 wiLocal(-1 * woLocal.x, -1 * woLocal.y, woLocal.z);
 		*wi = this->LocalToWorld(wiLocal);
 		*pdf = 1.0;
+		*sampledType = BxDFType::BSDF_SPECULAR;
 		return R / wi->Dot(ns);
 	}
 	bool IsDelta() { return true; }
 	double Pdf(const Vec3 &wo, const Vec3 &wi) const { return 0.0; }
 	Vec3 f(const Vec3 &wo, const Vec3 &wi) const { return Vec3(0.0, 0.0, 0.0); }
-
+	BxDFType bsdfType = BSDF_SPECULAR;
 private:
 	const Vec3 R;
 };
@@ -146,9 +153,9 @@ private:
 class SpecularTransmission : public BSDF {
 public:
 	SpecularTransmission(Vec3 normal, Vec3 surfacenorm, Vec3 t, double _eta0 = 1.0, double _eta1 = 1.5, TransportMode mode = TransportMode::Radiance) :
-		BSDF(normal, surfacenorm), T(t), eta0(_eta0), eta1(_eta1), fresnel(_eta0, _eta1) {}
+		BSDF(normal, surfacenorm), T(t), eta0(_eta0), eta1(_eta1), fresnel(_eta0, _eta1), mode(mode) {}
 
-	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, TransportMode mode) const override {
+	Vec3 Sample_f(const Vec3 &wo, Vec3 *wi, double *pdf, const Vec3 &u, BxDFType* sampledType) const override {
 		Vec3 woLocal = this->WorldToLocal(wo);
 		double cosTheta = CosTheta(woLocal);
 		double entering = ns.Dot(surfaceNormal) > 0;
@@ -158,6 +165,7 @@ public:
 		//double fresnelreflect = fresnel.Fresnel_Schlick(cosTheta, entering);
 		double prob = 0.5 * fresnelreflect + 0.25;
 		//double prob = 0.0;
+		*sampledType = BxDFType::BSDF_TRANSMISSION;
 		if (u[0] < prob) {
 			//reflection
 			Vec3 wiLocal(-1 * woLocal.x, -1 * woLocal.y, woLocal.z);
@@ -196,10 +204,13 @@ public:
 	bool IsDelta() { return true; }
 	double Pdf(const Vec3 &wo, const Vec3 &wi) const { return 0.0; }
 	Vec3 f(const Vec3 &wo, const Vec3 &wi) const { return Vec3(0.0, 0.0, 0.0); }
+
+	BxDFType bsdfType = BSDF_TRANSMISSION;
 private:
 	const Vec3 T;
 	const double eta0, eta1;
 	const Fresnel fresnel;
+	const TransportMode mode;
 };
 
 #endif

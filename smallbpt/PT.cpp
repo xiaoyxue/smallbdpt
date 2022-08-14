@@ -15,7 +15,7 @@ Vec3 PathTracing::Li(const Ray& r, const Scene& scene, Sampler& sampler) const
 		}
 		std::shared_ptr<BSDF> pBSDF = isect.mpBSDF;
 
-		if ((i == 0 || deltaBoundEvent) && isect.IsLight) {
+		if ((i == 0 || deltaBoundEvent) && isect.mIsLight) {
 			Shape* pLight = isect.pLight->GetShape();
 			L += throughput * pLight->Emission();
 		}
@@ -24,7 +24,7 @@ Vec3 PathTracing::Li(const Ray& r, const Scene& scene, Sampler& sampler) const
 		}
 		Vec3 wi;
 		double pdfW;
-		Vec3 f = pBSDF->Sample_f(-1 * ray.d, &wi, &pdfW, sampler.Get3D());
+		Vec3 f = pBSDF->Sample_f(-1 * ray.d, &wi, &pdfW, sampler.Get3D(), nullptr);
 		wi.Normalize();
 		if (f == Vec3() || pdfW == 0) break;
 		Vec3 estimation = f * std::abs(isect.mNormal.Dot(wi)) / pdfW;

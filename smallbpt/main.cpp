@@ -59,7 +59,7 @@ void SceneBDPT() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render(scene, camera);
 
-	BidirectionalPathTracing bpt(&sampler, 512, 15, false, false);
+	BidirectionalPathTracing bpt(&sampler, 32, 15, false, false);
 	bpt.Render(scene, camera);
 
 	//PathTracing pt(&sampler, 128, 15);
@@ -71,7 +71,7 @@ void SceneBDPT() {
 void ScenePT() {
 	int width = 1024, height = 1024;
 
-	std::string filename = "Result/PT_test3.png";
+	std::string filename = "Result/BDPT_test4.png";
 	Film film(width, height, filename);
 	Camera camera;
 	Vec3 camPos(0, 0, 3), d(0, 0, -1);
@@ -92,7 +92,7 @@ void ScenePT() {
 	//BidirectionalPathTracing bpt(&sampler, 128, 15, false, false);
 	//bpt.Render(scene, camera);
 
-	PathTracing pt(&sampler, 512, 15);
+	PathTracing pt(&sampler, 32, 15);
 	pt.Render(scene, camera);
 
 	std::cout << std::endl;
@@ -101,7 +101,7 @@ void ScenePT() {
 int main() {
 	
 	SceneBDPT();
-	ScenePT();
+	//ScenePT();
 	
 	return 0;
 }
