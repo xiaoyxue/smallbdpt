@@ -40,10 +40,20 @@ void Camera::Init() {
 	aspectRatio = film->aspect;
 }
 
-int Camera::GenerateCameraRay(const CameraSample &sample, Ray &ray) const {
+Vec3 Camera::GenerateCameraRay(int x, int y, const CameraSample &sample, Ray &ray) const {
 	Vec3 pFilm = Vec3(sample.pFilm.x, sample.pFilm.y, 0);
-	Vec3 dir = (pFilm - o).Norm();
+	Vec3 pRaster = Vec3(x + pFilm.x, y + pFilm.y, 0);
+	Vec3 worldCoord = RasterToWorld(pRaster);
+	Vec3 dir = (worldCoord - o).Norm();
 	ray.o = o;
 	ray.d = dir;
-	return 1;
+	return Vec3(1, 1, 1);
+}
+
+Vec3 Camera::RasterToWorld(const Vec3& pRaster) const
+{
+	double x = pRaster.x / film->resX * (film->RU - film->LU).x;
+	double y = pRaster.y / film->resY * (film->LL - film->LU).y;
+	double z = film->LL.z;
+	return Vec3(x, y, z);
 }

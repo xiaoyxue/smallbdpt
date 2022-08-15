@@ -11,7 +11,7 @@ public:
 	VisibilityTester() {}
 
 	VisibilityTester(const Intersection& p0, const Intersection& p1)
-		: mP0(p0), mP1(p1)
+		: mP0(p0)
 	{
 	}
 

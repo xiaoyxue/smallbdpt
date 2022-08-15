@@ -17,8 +17,9 @@ public:
 
 	void Init();
 
-	int GenerateCameraRay(const CameraSample &sample, Ray &ray) const;
+	Vec3 GenerateCameraRay(int x, int y, const CameraSample &sample, Ray &ray) const;
 
+	Vec3 RasterToWorld(const Vec3& pRaster) const;
 
 	Vec3 We(const Ray &ray) const {
 		double PdfA = 1.0; // for the pinhole camera

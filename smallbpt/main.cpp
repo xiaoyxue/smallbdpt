@@ -8,7 +8,7 @@
 #include "LightTracing.h"
 #include "BDPT.h"
 #include "PT.h"
-
+#include "BDPTV2.h"
 
 void SceneOne() {
 	int width = 1024 , height = 768;
@@ -30,8 +30,8 @@ void SceneOne() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render(scene, camera);
 
-	BidirectionalPathTracing bpt(&sampler, 15, 32, false, false);
-	bpt.Render(scene, camera);
+	//BidirectionalPathTracing bpt(&sampler, 15, 32, false, false);
+	//bpt.Render(scene, camera);
 
 	//PathTracing pt(&sampler, 128, 15);
 	//pt.Render(scene, camera);
@@ -59,12 +59,14 @@ void SceneBDPT() {
 	//LightTracing lt(&sampler, &camera, 8, 32);
 	//lt.Render(scene, camera);
 
-	BidirectionalPathTracing bpt(&sampler, 32, 15, false, false);
-	bpt.Render(scene, camera);
+	//BidirectionalPathTracing bpt(&sampler, 32, 15, false, false);
+	//bpt.Render(scene, camera);
 
 	//PathTracing pt(&sampler, 128, 15);
 	//pt.Render(scene, camera);
-	std::cout << std::endl;
+
+	BDPTIntegrator bdpt(&sampler, 32, 15, false, false);
+	bdpt.Render(scene, camera);
 
 }
 
@@ -92,10 +94,8 @@ void ScenePT() {
 	//BidirectionalPathTracing bpt(&sampler, 128, 15, false, false);
 	//bpt.Render(scene, camera);
 
-	PathTracing pt(&sampler, 32, 15);
-	pt.Render(scene, camera);
-
-	std::cout << std::endl;
+	//PathTracing pt(&sampler, 32, 15);
+	//pt.Render(scene, camera);
 }
 
 int main() {

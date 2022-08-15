@@ -6,7 +6,6 @@
 #include "Memory.h"
 #include <unordered_map>
 
-namespace bdptV2 {
 
 	extern double CorrectShadingNormal(const SurfaceIntersection& isect,
 		const Vec3& wo, const Vec3& wi,
@@ -41,26 +40,17 @@ namespace bdptV2 {
 	class BDPTIntegrator : public Integrator {
 	public:
 		// BDPTIntegrator Public Methods
-		BDPTIntegrator(std::shared_ptr<Sampler> sampler,
-			std::shared_ptr<const Camera> camera, int maxDepth,
-			bool visualizeStrategies, bool visualizeWeights,
-			const std::string& lightSampleStrategy = "power")
-			: sampler(sampler),
-			camera(camera),
-			maxDepth(maxDepth),
-			visualizeStrategies(visualizeStrategies),
-			visualizeWeights(visualizeWeights),
-			lightSampleStrategy(lightSampleStrategy) {}
-		void Render(const Scene& scene);
+		BDPTIntegrator(Sampler* sampler, int spp, int maxDepth, bool visualizeStrategies, bool visualizeWeights)
+			: sampler(sampler), maxDepth(maxDepth), spp(spp), visualizeStrategies(visualizeStrategies), visualizeWeights(visualizeWeights) {}
+		void Render(const Scene& scene, const Camera &camera) override;
 
 	private:
 		// BDPTIntegrator Private Data
-		std::shared_ptr<Sampler> sampler;
-		std::shared_ptr<const Camera> camera;
+		Sampler* sampler;
 		const int maxDepth;
 		const bool visualizeStrategies;
 		const bool visualizeWeights;
-		const std::string lightSampleStrategy;
+		const int spp;
 	};
 
 
@@ -244,16 +234,14 @@ namespace bdptV2 {
 		Sampler& sampler,
 		MemoryPool &arena,
 		int maxDepth,
-		Vertex* path,
-		const Vec2& pFilm);
+		const Vec2& pFilm,
+		Vertex* path);
 
 	extern int GenerateLightSubpath(
 		const Scene& scene, 
 		Sampler& sampler, 
 		MemoryPool &arena,
 		int maxDepth,
-		double time, 
-		const Distribution1D& lightDistr,
 		const std::unordered_map<const Light*, size_t>& lightToIndex,
 		Vertex* path);
 
@@ -304,4 +292,3 @@ namespace bdptV2 {
 		v.pdfFwd = pdf;
 		return v;
 	}
-}

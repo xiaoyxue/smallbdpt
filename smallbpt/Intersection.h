@@ -6,6 +6,7 @@
 
 class BSDF;
 class Light;
+
 class Intersection {
 public:
 

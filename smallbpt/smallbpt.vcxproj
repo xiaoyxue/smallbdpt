@@ -165,6 +165,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Integrator.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="LightDistribution.cpp" />
     <ClCompile Include="LightTracing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Integrator.h" />
     <ClInclude Include="Intersection.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LightDistribution.h" />
     <ClInclude Include="LightTracing.h" />
     <ClInclude Include="Linagl.h" />
     <ClInclude Include="Memory.h" />

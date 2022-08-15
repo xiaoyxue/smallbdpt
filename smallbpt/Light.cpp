@@ -64,7 +64,7 @@ void AreaLight::PdfLe(const Ray& ray, const Vec3& n, double* pdfPos, double* pdf
 	*pdfDir = CosineHemispherePdf(std::abs(n.Dot(ray.d)));
 }
 
-Vec3 AreaLight::SampleLe(const Vec3& u1, const Vec3& u2, double time, Ray* ray, Vec3* nLight, double* pdfPos, double* pdfDir) const
+Vec3 AreaLight::SampleLe(const Vec3& u1, const Vec3& u2, Ray* ray, Vec3* nLight, double* pdfPos, double* pdfDir) const
 {
 	Intersection pShape = mpShape->Sample(pdfPos, u1);
 	*nLight = mpShape->GetNormal(Vec3());
